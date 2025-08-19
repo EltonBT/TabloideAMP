@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}TabloideMP{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <h1><a href="/">TabloideMP</a></h1>
+        <nav>
+          <a href="{% url 'relatorios:home' %}">Início</a>
+          <a href="{% url 'relatorios:produto_list' %}">Produtos</a>
+          <a href="{% url 'relatorios:importacao' %}">Importação</a>
+          <a href="{% url 'relatorios:template_list' %}">Templates</a>
+          <a href="{% url 'relatorios:empresa_list' %}">Empresas</a>
+          <!-- <a href="{% url 'relatorios:pdf_tabloide' %}">PDF</a> -->
+          <div class="theme-switch" aria-label="Alternar tema">
+            <button
+              id="theme-switch"
+              class="theme-switch-toggle"
+              type="button"
+              role="switch"
+              aria-checked="false"
+              title="Alternar tema claro/escuro"
+            >
+              <span class="icon icon-moon" aria-hidden="true">☀️</span>
+              <span class="icon icon-sun" aria-hidden="true">🌙</span>
+              <span class="knob" aria-hidden="true"></span>
+            </button>
+          </div>
+          {% if user.is_authenticated %}
+          <span style="margin-left: 8px; opacity: 0.8"
+            >{{ user.username }}</span
+          >
+          <a href="{% url 'relatorios:perfil' %}">Meu Perfil</a>
+          <form
+            action="{% url 'logout' %}"
+            method="post"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button
+              type="submit"
+              style="
+                background: none;
+                border: none;
+                color: inherit;
+                cursor: pointer;
+                padding: 0;
+                text-decoration: underline;
+              "
+            >
+              Sair
+            </button>
+          </form>
+          {% else %}
+          <a href="{% url 'login' %}">Login</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">{% block content %}{% endblock %}</main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small>&copy; {% now 'Y' %} TabloideMP</small>
+      </div>
+    </footer>
+    <script>
+      (function () {
+        const root = document.documentElement;
+        const key = "theme";
+        const sw = document.getElementById("theme-switch");
+        function apply(mode) {
+          const isLight = mode === "light";
+          root.classList.toggle("theme-light", isLight);
+          if (sw) sw.setAttribute("aria-checked", String(isLight));
+        }
+        apply(localStorage.getItem(key) === "light" ? "light" : "dark");
+        if (sw) {
+          sw.addEventListener("click", function () {
+            const isLight = root.classList.toggle("theme-light");
+            localStorage.setItem(key, isLight ? "light" : "dark");
+            sw.setAttribute("aria-checked", String(isLight));
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
