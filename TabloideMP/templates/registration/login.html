@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Login - TabloideMP{% endblock %}
+{% block content %}
+<section>
+  <h2>Login</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Entrar</button>
+  </form>
+  <p>Ainda não tem conta? <a href="{% url 'relatorios:signup' %}">Registrar</a></p>
+</section>
+{% endblock %}
+
+

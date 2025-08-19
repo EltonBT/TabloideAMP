@@ -1,0 +1,73 @@
+:root {
+    --container: 960px;
+    --bg: #0b0c10;
+    --card: #12141a;
+    --text: #e6edf3;
+    --muted: #9aa4b2;
+    --brand: #7c3aed;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; }
+
+.container { max-width: var(--container); margin: 0 auto; padding: 16px; }
+
+.site-header, .site-footer { background: var(--card); border-bottom: 1px solid #20242d; }
+.site-footer { border-top: 1px solid #20242d; border-bottom: none; }
+.site-header h1 { margin: 0; font-size: 20px; }
+.site-header nav a { color: var(--text); text-decoration: none; margin-right: 12px; }
+.site-header nav a:hover { color: var(--brand); }
+
+h2 { margin-top: 0; }
+
+section { background: var(--card); padding: 16px; border-radius: 8px; border: 1px solid #20242d; }
+
+a { color: var(--brand); }
+a:hover { opacity: 0.9; }
+
+/* Tema claro */
+.theme-light {
+    --bg: #f7f7f8;
+    --card: #ffffff;
+    --text: #0b1220;
+    --muted: #4b5563;
+}
+
+.theme-toggle {
+    background: none;
+    color: var(--text);
+    border: 1px solid #20242d;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+ .theme-toggle:hover { border-color: var(--brand); }
+
+.theme-switch { display: inline-flex; align-items: center; margin-right: 8px; }
+.theme-switch-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid #20242d;
+    border-radius: 999px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+.theme-switch-toggle .icon { font-size: 14px; }
+.theme-switch-toggle .knob {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    width: 18px;
+    border-radius: 999px;
+    background: var(--brand);
+    transition: transform 0.2s ease-in-out;
+    transform: translateX(2px);
+}
+/* Quando tema claro, mova a bolinha para perto do sol (direita) */
+.theme-light .theme-switch-toggle .knob { transform: translateX(28px); }
+
+

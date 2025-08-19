@@ -1,0 +1,38 @@
+{% extends 'base.html' %} {% block title %}{{ page_title }} - TabloideMP
+{%endblock %} {% block content %}
+<section>
+  <h2>{{ page_title }}</h2>
+  <p>Seu front-end usa Django Templates. Esta página é um exemplo inicial.</p>
+  <ul>
+    <li>
+      <a href="{% url 'relatorios:produto_list' %}">Cadastro de Produtos</a>
+    </li>
+    <li>
+      <a href="{% url 'relatorios:importacao' %}"
+        >Importação de Tabela de Preços</a
+      >
+    </li>
+    <li>
+      <a href="{% url 'relatorios:template_list' %}">Templates de Tabloide</a>
+    </li>
+    <li>
+      <a href="{% url 'relatorios:pdf_tabloide' %}"
+        >Gerar PDF (Tabloide 11x17)</a
+      >
+    </li>
+    <li>
+      <a href="{% url 'relatorios:jpeg_tabloide' %}"
+        >Gerar JPEG (Tabloide 11x17)</a
+      >
+    </li>
+  </ul>
+  <hr />
+  <h3>Pré-visualização PDF Exemplo</h3>
+  <iframe
+    src="{% url 'relatorios:pdf_exemplo' %}"
+    width="100%"
+    height="800"
+    style="border: 1px solid #20242d; border-radius: 8px"
+  ></iframe>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'base.html' %} {% block title %}Importação de Tabela - TabloideMP
+{%endblock %} {% block content %}
+<section>
+  <h2>Importar Tabela de Preços (.xlsx/.csv)</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %} {{ form.as_p }}
+    <button type="submit">Importar</button>
+  </form>
+</section>
+{% endblock %}
