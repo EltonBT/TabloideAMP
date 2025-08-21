@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Empresa - TabloideMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard {
+    padding: var(--space-xl) 0;
+  }
+
+  .dashboard-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    padding: var(--space-2xl);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-2xl);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(50px, -50px);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .empresa-info {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-top: var(--space-lg);
+  }
+
+  .empresa-info h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    color: white;
+  }
+
+  .fantasia {
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+    margin-bottom: var(--space-xs);
+  }
+
+  .cnpj {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .dashboard-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary-light);
+  }
+
+  .card-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-lg);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+  }
+
+  .dashboard-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-md);
+  }
+
+  .dashboard-card p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+    line-height: 1.6;
+  }
+
+  .card-action {
+    margin-top: auto;
+  }
+
+  .recent-activity {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+  }
+
+  .activity-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-md);
+    color: white;
+  }
+
+  .activity-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .no-activity {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--space-2xl);
+    background: var(--background-subtle);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--border);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-title {
+      font-size: 2rem;
+    }
+    
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+    
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+  <div class="dashboard-hero">
+    <div class="hero-content">
+      <h1 class="dashboard-title">Dashboard Empresarial</h1>
+      <p>Gerencie seus produtos, templates e relatórios</p>
+      
+      <div class="empresa-info">
+        <h2>{{ empresa.razao_social }}</h2>
+        {% if empresa.nome_fantasia %}
+          <p class="fantasia">{{ empresa.nome_fantasia }}</p>
+        {% endif %}
+        <p class="cnpj">CNPJ: {{ empresa.cnpj }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Produtos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Templates</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Relatórios</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Clientes</div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <div class="card-icon">📦</div>
+      <h3>Gerenciar Produtos</h3>
+      <p>Cadastre e organize seu catálogo de produtos com preços, descrições e imagens.</p>
+      <div class="card-action">
+        <a href="{% url 'relatorios:produto_list' %}" class="btn btn-primary">Ver Produtos</a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-icon">📋</div>
+      <h3>Templates de Tabloide</h3>
+      <p>Crie templates personalizados para gerar tabloides profissionais e atrativoss.</p>
+      <div class="card-action">
+        <a href="{% url 'relatorios:template_list' %}" class="btn btn-primary">Ver Templates</a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-icon">📊</div>
+      <h3>Gerar Relatórios</h3>
+      <p>Produza tabloides em PDF e JPEG com base nos seus templates e produtos.</p>
+      <div class="card-action">
+        <a href="{% url 'relatorios:template_list' %}" class="btn btn-primary">Gerar Agora</a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-icon">⚙️</div>
+      <h3>Configurações</h3>
+      <p>Atualize informações da empresa, preferências e configurações do sistema.</p>
+      <div class="card-action">
+        <a href="{% url 'relatorios:perfil' %}" class="btn btn-secondary">Configurar</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="recent-activity">
+    <div class="activity-header">
+      <div class="activity-icon">🕒</div>
+      <h3>Atividade Recente</h3>
+    </div>
+    <div class="activity-list">
+      <div class="no-activity">
+        <p>Nenhuma atividade recente encontrada.</p>
+        <small>Suas ações mais recentes aparecerão aqui.</small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

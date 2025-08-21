@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
+from django.contrib.auth import views as auth_views
 
 from . import views
 
@@ -9,9 +10,29 @@ app_name = "relatorios"
 
 
 urlpatterns = [
-    path("", views.home, name="home"),
-    path("signup/", views.signup, name="signup"),
+    # Página inicial - redireciona para escolha de área
+    path("", views.escolher_area, name="home"),
+    path("escolher-area/", views.escolher_area, name="escolher_area"),
+    
+    # Autenticação de Empresa
+    path("empresa/login/", views.EmpresaLoginView.as_view(), name="empresa_login"),
+    path("empresa/signup/", views.empresa_signup, name="empresa_signup"),
+    path("empresa/dashboard/", views.empresa_dashboard, name="empresa_dashboard"),
+    path("empresa/logout/", auth_views.LogoutView.as_view(
+        next_page='/'
+    ), name="empresa_logout"),
+    
+    # Autenticação de Cliente
+    path("cliente/login/", views.ClienteLoginView.as_view(), name="cliente_login"),
+    path("cliente/signup/", views.cliente_signup, name="cliente_signup"),
+    path("cliente/dashboard/", views.cliente_dashboard, name="cliente_dashboard"),
+    path("cliente/logout/", auth_views.LogoutView.as_view(
+        next_page='/'
+    ), name="cliente_logout"),
+    
+    # Perfil e logout (compartilhados)
     path("perfil/", views.perfil, name="perfil"),
+    path("logout/", views.custom_logout, name="logout"),
     # Empresas CRUD
     path("empresas/", views.EmpresaListView.as_view(), name="empresa_list"),
     path("empresas/novo/", views.EmpresaCreateView.as_view(), name="empresa_create"),

@@ -8,62 +8,115 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Produto',
+            name="Produto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('codigo', models.CharField(max_length=50, unique=True)),
-                ('codigo_barras', models.CharField(blank=True, max_length=64, null=True, unique=True)),
-                ('nome', models.CharField(max_length=200)),
-                ('descricao', models.TextField(blank=True)),
-                ('preco', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('imagem', models.ImageField(blank=True, null=True, upload_to='produtos/')),
-                ('criado_em', models.DateTimeField(auto_now_add=True)),
-                ('atualizado_em', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("codigo", models.CharField(max_length=50, unique=True)),
+                (
+                    "codigo_barras",
+                    models.CharField(blank=True, max_length=64, null=True, unique=True),
+                ),
+                ("nome", models.CharField(max_length=200)),
+                ("descricao", models.TextField(blank=True)),
+                ("preco", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "imagem",
+                    models.ImageField(blank=True, null=True, upload_to="produtos/"),
+                ),
+                ("criado_em", models.DateTimeField(auto_now_add=True)),
+                ("atualizado_em", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'ordering': ['nome'],
+                "ordering": ["nome"],
             },
         ),
         migrations.CreateModel(
-            name='TabelaPrecoImportacao',
+            name="TabelaPrecoImportacao",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('arquivo', models.FileField(upload_to='importacoes/')),
-                ('criado_em', models.DateTimeField(auto_now_add=True)),
-                ('processado', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("arquivo", models.FileField(upload_to="importacoes/")),
+                ("criado_em", models.DateTimeField(auto_now_add=True)),
+                ("processado", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='TemplateTabloide',
+            name="TemplateTabloide",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nome', models.CharField(max_length=100)),
-                ('colunas', models.PositiveIntegerField(default=3)),
-                ('linhas', models.PositiveIntegerField(default=4)),
-                ('cor_fundo_row', models.CharField(default='#FFFFFF', max_length=7)),
-                ('background_imagem', models.ImageField(blank=True, null=True, upload_to='backgrounds/')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("nome", models.CharField(max_length=100)),
+                ("colunas", models.PositiveIntegerField(default=3)),
+                ("linhas", models.PositiveIntegerField(default=4)),
+                ("cor_fundo_linha", models.CharField(default="#FFFFFF", max_length=7)),
+                (
+                    "background_imagem",
+                    models.ImageField(blank=True, null=True, upload_to="backgrounds/"),
+                ),
             ],
             options={
-                'verbose_name': 'Template de Tabloide',
-                'verbose_name_plural': 'Templates de Tabloide',
+                "verbose_name": "Template de Tabloide",
+                "verbose_name_plural": "Templates de Tabloide",
             },
         ),
         migrations.CreateModel(
-            name='ItemTabloide',
+            name="ItemTabloide",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ordem', models.PositiveIntegerField(default=0)),
-                ('produto', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='relatorios.produto')),
-                ('template', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='itens', to='relatorios.templatetabloide')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("ordem", models.PositiveIntegerField(default=0)),
+                (
+                    "produto",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="relatorios.produto",
+                    ),
+                ),
+                (
+                    "template",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="itens",
+                        to="relatorios.templatetabloide",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['ordem'],
-                'unique_together': {('template', 'produto')},
+                "ordering": ["ordem"],
+                "unique_together": {("template", "produto")},
             },
         ),
     ]

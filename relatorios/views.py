@@ -1,6 +1,9 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from .decorators import empresa_required, cliente_required, EmpresaRequiredMixin, ClienteRequiredMixin
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
+from django.contrib.auth import login, logout
 from django.http import HttpRequest, HttpResponse, FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -16,9 +19,12 @@ from .forms import (
     ItemTabloideForm,
     ProdutoForm,
     TemplateTabloideForm,
+    TemplateTabloideEditForm,
     EmpresaForm,
+    EmpresaSignUpForm,
+    ClienteSignUpForm,
 )
-from .models import ItemTabloide, Produto, TemplateTabloide, Empresa
+from .models import ItemTabloide, Produto, TemplateTabloide, Empresa, UsuarioCliente
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -28,82 +34,214 @@ def home(request: HttpRequest) -> HttpResponse:
     return render(request, "relatorios/home.html", context)
 
 
-def signup(request: HttpRequest) -> HttpResponse:
+# Views de autenticação separadas
+def empresa_signup(request: HttpRequest) -> HttpResponse:
     if request.user.is_authenticated:
-        return redirect("relatorios:home")
+        return redirect("relatorios:empresa_dashboard")
+    
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = EmpresaSignUpForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("login")
+            user = form.save()
+            user.email = form.cleaned_data['email']
+            user.save()
+            
+            # Criar perfil da empresa
+            Empresa.objects.create(
+                user=user,
+                razao_social=form.cleaned_data['razao_social'],
+                nome_fantasia=form.cleaned_data['nome_fantasia'],
+                cnpj=form.cleaned_data['cnpj'],
+                ie=form.cleaned_data['ie'],
+                email=form.cleaned_data['email'],
+                telefone=form.cleaned_data['telefone']
+            )
+            return redirect("relatorios:empresa_login")
     else:
-        form = UserCreationForm()
-    return render(request, "registration/signup.html", {"form": form})
+        form = EmpresaSignUpForm()
+    
+    return render(request, "registration/empresa_signup.html", {"form": form})
+
+
+def cliente_signup(request: HttpRequest) -> HttpResponse:
+    if request.user.is_authenticated:
+        return redirect("relatorios:cliente_dashboard")
+    
+    if request.method == "POST":
+        form = ClienteSignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.email = form.cleaned_data['email']
+            user.save()
+            
+            # Criar perfil do cliente
+            UsuarioCliente.objects.create(
+                user=user,
+                nome_completo=form.cleaned_data['nome_completo'],
+                telefone=form.cleaned_data['telefone'],
+                cpf=form.cleaned_data['cpf']
+            )
+            return redirect("relatorios:cliente_login")
+    else:
+        form = ClienteSignUpForm()
+    
+    return render(request, "registration/cliente_signup.html", {"form": form})
+
+
+def empresa_dashboard(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return redirect("relatorios:empresa_login")
+    
+    try:
+        empresa = request.user.empresa_profile
+    except Empresa.DoesNotExist:
+        return redirect("relatorios:empresa_login")
+    
+    context = {
+        "page_title": "Dashboard Empresa",
+        "empresa": empresa,
+    }
+    return render(request, "relatorios/empresa/dashboard.html", context)
+
+
+def cliente_dashboard(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return redirect("relatorios:cliente_login")
+    
+    try:
+        cliente = request.user.cliente_profile
+    except UsuarioCliente.DoesNotExist:
+        return redirect("relatorios:cliente_login")
+    
+    context = {
+        "page_title": "Dashboard Cliente",
+        "cliente": cliente,
+    }
+    return render(request, "relatorios/cliente/dashboard.html", context)
+
+
+# Views de escolha de área
+def escolher_area(request: HttpRequest) -> HttpResponse:
+    context = {}
+    
+    if request.user.is_authenticated:
+        # Permitir admin acessar a página de escolha
+        if request.user.is_superuser:
+            context['is_admin'] = True
+            context['user'] = request.user
+        else:
+            # Verificar tipo de usuário e redirecionar
+            try:
+                empresa = request.user.empresa_profile
+                return redirect("relatorios:empresa_dashboard")
+            except Empresa.DoesNotExist:
+                try:
+                    cliente = request.user.cliente_profile
+                    return redirect("relatorios:cliente_dashboard")
+                except UsuarioCliente.DoesNotExist:
+                    # Usuário logado mas sem perfil - mostrar mensagem
+                    context['user_without_profile'] = True
+                    context['user'] = request.user
+    
+    return render(request, "registration/escolher_area.html", context)
+
+
+# Views de login customizadas
+class EmpresaLoginView(LoginView):
+    template_name = 'registration/empresa_login.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('relatorios:empresa_dashboard')
+
+
+class ClienteLoginView(LoginView):
+    template_name = 'registration/cliente_login.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('relatorios:cliente_dashboard')
+
+
+# View de logout genérica
+def custom_logout(request: HttpRequest) -> HttpResponse:
+    """
+    Logout customizado que detecta o tipo de usuário e redireciona adequadamente
+    """
+    if request.method == 'POST':
+        # Detectar tipo de usuário antes do logout
+        user_type = None
+        if request.user.is_authenticated:
+            try:
+                request.user.empresa_profile
+                user_type = "empresa"
+            except Empresa.DoesNotExist:
+                try:
+                    request.user.cliente_profile
+                    user_type = "cliente"
+                except UsuarioCliente.DoesNotExist:
+                    pass
+        
+        logout(request)
+        return redirect('relatorios:escolher_area')
+    
+    return redirect('relatorios:escolher_area')
 
 
 # Produtos CRUD
-class ProdutoListView(LoginRequiredMixin, ListView):
+class ProdutoListView(EmpresaRequiredMixin, ListView):
     model = Produto
     paginate_by = 20
     template_name = "relatorios/produtos/list.html"
 
 
-class ProdutoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    permission_required = "relatorios.add_produto"
+class ProdutoCreateView(EmpresaRequiredMixin, CreateView):
     model = Produto
     form_class = ProdutoForm
     template_name = "relatorios/produtos/form.html"
     success_url = reverse_lazy("relatorios:produto_list")
 
 
-class ProdutoUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    permission_required = "relatorios.change_produto"
+class ProdutoUpdateView(EmpresaRequiredMixin, UpdateView):
     model = Produto
     form_class = ProdutoForm
     template_name = "relatorios/produtos/form.html"
     success_url = reverse_lazy("relatorios:produto_list")
 
 
-class ProdutoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    permission_required = "relatorios.delete_produto"
+class ProdutoDeleteView(EmpresaRequiredMixin, DeleteView):
     model = Produto
     template_name = "relatorios/produtos/confirm_delete.html"
     success_url = reverse_lazy("relatorios:produto_list")
 
 
 # Empresas CRUD
-class EmpresaListView(LoginRequiredMixin, ListView):
+class EmpresaListView(EmpresaRequiredMixin, ListView):
     model = Empresa
     paginate_by = 20
     template_name = "relatorios/empresas/list.html"
 
 
-class EmpresaCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-    permission_required = "relatorios.add_empresa"
+class EmpresaCreateView(EmpresaRequiredMixin, CreateView):
     model = Empresa
     form_class = EmpresaForm
     template_name = "relatorios/empresas/form.html"
     success_url = reverse_lazy("relatorios:empresa_list")
 
 
-class EmpresaUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    permission_required = "relatorios.change_empresa"
+class EmpresaUpdateView(EmpresaRequiredMixin, UpdateView):
     model = Empresa
     form_class = EmpresaForm
     template_name = "relatorios/empresas/form.html"
     success_url = reverse_lazy("relatorios:empresa_list")
 
 
-class EmpresaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
-    permission_required = "relatorios.delete_empresa"
+class EmpresaDeleteView(EmpresaRequiredMixin, DeleteView):
     model = Empresa
     template_name = "relatorios/empresas/confirm_delete.html"
     success_url = reverse_lazy("relatorios:empresa_list")
 
 
 # Importação de tabela de preços
-@login_required
-@permission_required("relatorios.add_tabelaprecoimportacao", raise_exception=True)
+@empresa_required
 def importar_tabela_precos(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = ImportacaoTabelaForm(request.POST, request.FILES)
@@ -175,43 +313,46 @@ def importar_tabela_precos(request: HttpRequest) -> HttpResponse:
 
 
 # Templates de tabloide
-class TemplateTabloideListView(LoginRequiredMixin, ListView):
+class TemplateTabloideListView(EmpresaRequiredMixin, ListView):
     model = TemplateTabloide
     template_name = "relatorios/tabloide/template_list.html"
 
 
-class TemplateTabloideCreateView(
-    LoginRequiredMixin, PermissionRequiredMixin, CreateView
-):
-    permission_required = "relatorios.add_templatetabloide"
+class TemplateTabloideCreateView(EmpresaRequiredMixin, CreateView):
     model = TemplateTabloide
     form_class = TemplateTabloideForm
     template_name = "relatorios/tabloide/template_form.html"
     success_url = reverse_lazy("relatorios:template_list")
 
 
-class TemplateTabloideUpdateView(
-    LoginRequiredMixin, PermissionRequiredMixin, UpdateView
-):
-    permission_required = "relatorios.change_templatetabloide"
+class TemplateTabloideUpdateView(EmpresaRequiredMixin, UpdateView):
     model = TemplateTabloide
-    form_class = TemplateTabloideForm
-    template_name = "relatorios/tabloide/template_form.html"
+    form_class = TemplateTabloideEditForm
+    template_name = "relatorios/tabloide/template_edit.html"
     success_url = reverse_lazy("relatorios:template_list")
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Get items for preview
+        context['itens'] = self.object.itens.select_related('produto').order_by('ordem')
+        # Create grid positions for preview
+        total_positions = self.object.colunas * self.object.linhas
+        context['grid_positions'] = range(1, total_positions + 1)
+        return context
 
 
-@login_required
+@empresa_required
 def gerenciar_itens_tabloide(request: HttpRequest, pk: int) -> HttpResponse:
     template = get_object_or_404(TemplateTabloide, pk=pk)
     if request.method == "POST":
         if not request.user.has_perm("relatorios.change_templatetabloide"):
             return redirect("login")
-        form = ItemTabloideForm(request.POST)
+        form = ItemTabloideForm(request.POST, template=template)
         if form.is_valid():
             form.save()
             return redirect("relatorios:template_items", pk=template.pk)
     else:
-        form = ItemTabloideForm(initial={"template": template})
+        form = ItemTabloideForm(template=template)
     itens = template.itens.select_related("produto").all()
     return render(
         request,
@@ -220,8 +361,7 @@ def gerenciar_itens_tabloide(request: HttpRequest, pk: int) -> HttpResponse:
     )
 
 
-@login_required
-@permission_required("relatorios.change_templatetabloide", raise_exception=True)
+@empresa_required
 def remover_item_tabloide(
     request: HttpRequest, template_pk: int, item_pk: int
 ) -> HttpResponse:
@@ -241,10 +381,27 @@ def remover_item_tabloide(
 def perfil(request: HttpRequest) -> HttpResponse:
     user = request.user
     grupos = list(user.groups.values_list("name", flat=True))
+    
+    # Verificar tipo de usuário
+    user_type = "admin"
+    profile = None
+    
+    try:
+        profile = user.empresa_profile
+        user_type = "empresa"
+    except Empresa.DoesNotExist:
+        try:
+            profile = user.cliente_profile
+            user_type = "cliente"
+        except UsuarioCliente.DoesNotExist:
+            pass
+    
     context = {
         "page_title": "Meu Perfil",
         "user_obj": user,
         "grupos": grupos,
+        "user_type": user_type,
+        "profile": profile,
     }
     return render(request, "relatorios/perfil.html", context)
 
@@ -295,17 +452,27 @@ def gerar_pdf_tabloide(request: HttpRequest) -> HttpResponse:
                 )
         except Exception:
             pass
-        # Desenha fundo por linha
+        # Desenha fundo por linha com cores alternadas
         try:
             from reportlab.lib.colors import HexColor
 
-            bg_color = HexColor(template.cor_fundo_row)
+            bg_color_1 = HexColor(template.cor_fundo_row)
+            # Usa cor alternada se preenchida, senão usa branco
+            cor_alt = (
+                template.cor_fundo_alternada.strip()
+                if template.cor_fundo_alternada
+                else "#FFFFFF"
+            )
+            bg_color_2 = HexColor(cor_alt) if cor_alt else colors.white
         except Exception:
-            bg_color = colors.whitesmoke
+            bg_color_1 = colors.whitesmoke
+            bg_color_2 = colors.white
         y = pagina_altura - margem
         for l in range(linhas):
             y -= altura_celula
-            pdf.setFillColor(bg_color)
+            # Alterna entre as duas cores
+            current_color = bg_color_1 if l % 2 == 0 else bg_color_2
+            pdf.setFillColor(current_color)
             pdf.rect(margem, y, largura_util, altura_celula, fill=1, stroke=0)
         # Conteúdo
         pdf.setFillColor(colors.black)
@@ -440,15 +607,30 @@ def gerar_jpeg_tabloide(request: HttpRequest) -> HttpResponse:
     except Exception:
         pass
 
-    # Fundo das linhas
+    # Fundo das linhas com cores alternadas
     try:
-        hex_color = template.cor_fundo_row.lstrip("#") if template else "EEEEEE"
-        bg = tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
+        hex_color_1 = template.cor_fundo_row.lstrip("#") if template else "EEEEEE"
+        bg_1 = tuple(int(hex_color_1[i : i + 2], 16) for i in (0, 2, 4))
+
+        # Usa cor alternada se preenchida, senão usa branco
+        cor_alt = (
+            template.cor_fundo_alternada.strip()
+            if template and template.cor_fundo_alternada
+            else "#FFFFFF"
+        )
+        hex_color_2 = cor_alt.lstrip("#")
+        bg_2 = tuple(int(hex_color_2[i : i + 2], 16) for i in (0, 2, 4))
     except Exception:
-        bg = (238, 238, 238)
+        bg_1 = (238, 238, 238)
+        bg_2 = (255, 255, 255)
+
     for r in range(linhas):
         y0 = margem + r * altura_cel
-        draw.rectangle([margem, y0, margem + largura_util, y0 + altura_cel], fill=bg)
+        # Alterna entre as duas cores
+        current_bg = bg_1 if r % 2 == 0 else bg_2
+        draw.rectangle(
+            [margem, y0, margem + largura_util, y0 + altura_cel], fill=current_bg
+        )
 
     # Conteúdo
     itens = list(template.itens.select_related("produto")) if template else []

@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Cliente - TabloideMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard {
+    padding: var(--space-xl) 0;
+  }
+
+  .dashboard-hero {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    padding: var(--space-2xl);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-2xl);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(50px, -50px);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cliente-info {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-top: var(--space-lg);
+  }
+
+  .cliente-info h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    color: white;
+  }
+
+  .username {
+    color: rgba(255, 255, 255, 0.8);
+    font-family: var(--font-mono, monospace);
+    margin-bottom: var(--space-xs);
+    font-size: 0.95rem;
+  }
+
+  .empresa {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .dashboard-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #34d399);
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+    border-color: #10b981;
+  }
+
+  .card-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-lg);
+    background: linear-gradient(135deg, #10b981, #34d399);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+  }
+
+  .dashboard-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-md);
+  }
+
+  .dashboard-card p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+    line-height: 1.6;
+  }
+
+  .card-action {
+    margin-top: auto;
+  }
+
+  .recent-activity {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+  }
+
+  .activity-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #10b981, #34d399);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--space-md);
+    color: white;
+  }
+
+  .activity-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .no-activity {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--space-2xl);
+    background: var(--background-subtle);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--border);
+  }
+
+  .welcome-banner {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+    text-align: center;
+  }
+
+  .welcome-banner h3 {
+    color: #10b981;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+  }
+
+  .welcome-banner p {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-title {
+      font-size: 2rem;
+    }
+    
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+  <div class="dashboard-hero">
+    <div class="hero-content">
+      <h1 class="dashboard-title">Portal do Cliente</h1>
+      <p>Acesse tabloides, relatórios e mantenha-se atualizado</p>
+      
+      <div class="cliente-info">
+        <h2>{{ cliente.nome_completo }}</h2>
+        <p class="username">@{{ cliente.user.username }}</p>
+        {% if cliente.empresa_associada %}
+          <p class="empresa">Associado à: {{ cliente.empresa_associada.razao_social }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="welcome-banner">
+    <h3>Bem-vindo ao TabloideMP!</h3>
+    <p>Explore tabloides interativos, acompanhe promoções e mantenha-se informado sobre produtos e serviços.</p>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="dashboard-card">
+      <div class="card-icon">📋</div>
+      <h3>Tabloides Disponíveis</h3>
+      <p>Navegue pelos tabloides publicados pelas empresas e descubra as últimas ofertas e promoções.</p>
+      <div class="card-action">
+        <a href="#" class="btn btn-primary">Explorar Tabloides</a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-icon">📊</div>
+      <h3>Relatórios e Análises</h3>
+      <p>Acesse relatórios detalhados e análises de mercado disponibilizados pelas empresas.</p>
+      <div class="card-action">
+        <a href="#" class="btn btn-primary">Ver Relatórios</a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-icon">🔔</div>
+      <h3>Notificações</h3>
+      <p>Receba atualizações importantes, novos tabloides e avisos das empresas que você acompanha.</p>
+      <div class="card-action">
+        <a href="#" class="btn btn-primary">Ver Notificações</a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-icon">⚙️</div>
+      <h3>Meu Perfil</h3>
+      <p>Gerencie seus dados pessoais, preferências de notificação e configurações da conta.</p>
+      <div class="card-action">
+        <a href="{% url 'relatorios:perfil' %}" class="btn btn-secondary">Editar Perfil</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="recent-activity">
+    <div class="activity-header">
+      <div class="activity-icon">🕒</div>
+      <h3>Últimos Tabloides Visualizados</h3>
+    </div>
+    <div class="activity-list">
+      <div class="no-activity">
+        <p>Nenhum tabloide visualizado recentemente.</p>
+        <small>Seus tabloides visitados aparecerão aqui para fácil acesso.</small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

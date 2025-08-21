@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}Editar Template - TabloideMP{% endblock %}
+{% block content %}
+<section>
+  <h2>Editar Template</h2>
+  
+  <div class="template-edit-container">
+    <div class="edit-form-section">
+      <h3>Configuração do Template</h3>
+      <form method="post" enctype="multipart/form-data" class="template-edit-form" id="template-form">
+        {% csrf_token %}
+        
+        <div class="form-section">
+          <h4>Informações Básicas</h4>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.nome.id_for_label }}">Nome do Template</label>
+              {{ form.nome }}
+              {% if form.nome.errors %}
+                <div class="error">{{ form.nome.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.colunas.id_for_label }}">Colunas</label>
+              {{ form.colunas }}
+              {% if form.colunas.errors %}
+                <div class="error">{{ form.colunas.errors }}</div>
+              {% endif %}
+              <small>Número de colunas (1-6)</small>
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.linhas.id_for_label }}">Linhas</label>
+              {{ form.linhas }}
+              {% if form.linhas.errors %}
+                <div class="error">{{ form.linhas.errors }}</div>
+              {% endif %}
+              <small>Número de linhas (1-8)</small>
+            </div>
+          </div>
+          
+          <div class="stats-info">
+            <div class="stat-item">
+              <span class="stat-label">Total de Posições:</span>
+              <span class="stat-value" id="total-positions">{{ object.colunas }}×{{ object.linhas }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Itens Configurados:</span>
+              <span class="stat-value" id="configured-items">{{ object.itens.count }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Posições Livres:</span>
+              <span class="stat-value" id="free-positions">-</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-section">
+          <h4>Cores do Tabloide</h4>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="{{ form.cor_fundo_row.id_for_label }}">Cor Principal</label>
+              <div class="color-input-wrapper">
+                {{ form.cor_fundo_row }}
+                <span class="color-hex" id="primary-hex">{{ object.cor_fundo_row }}</span>
+              </div>
+              {% if form.cor_fundo_row.errors %}
+                <div class="error">{{ form.cor_fundo_row.errors }}</div>
+              {% endif %}
+              <small>Cor das linhas principais</small>
+            </div>
+            
+            <div class="form-group">
+              <label for="{{ form.cor_fundo_alternada.id_for_label }}">Cor Alternada</label>
+              <div class="color-input-wrapper">
+                {{ form.cor_fundo_alternada }}
+                <span class="color-hex" id="alternate-hex">{{ object.cor_fundo_alternada }}</span>
+              </div>
+              {% if form.cor_fundo_alternada.errors %}
+                <div class="error">{{ form.cor_fundo_alternada.errors }}</div>
+              {% endif %}
+              <small>Cor para intercalar (branco = sem intercalação)</small>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-section">
+          <h4>Imagem de Fundo</h4>
+          
+          <div class="form-group">
+            <label for="{{ form.background_imagem.id_for_label }}">Arquivo de Imagem</label>
+            {{ form.background_imagem }}
+            {% if form.background_imagem.errors %}
+              <div class="error">{{ form.background_imagem.errors }}</div>
+            {% endif %}
+            {% if object.background_imagem %}
+              <div class="current-image">
+                <small>✓ Imagem atual: {{ object.background_imagem.name }}</small>
+                <button type="button" class="btn-remove-image" onclick="removeBackgroundImage()">Remover</button>
+              </div>
+            {% endif %}
+            <small>Imagem de fundo opcional (JPG, PNG)</small>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="preview-section">
+      <h3>Preview em Tempo Real</h3>
+      <div class="mini-preview">
+        <div class="preview-container">
+          <div class="preview-grid" id="preview-grid">
+            <!-- Grid cells will be populated by JavaScript -->
+          </div>
+        </div>
+        <div class="preview-info">
+          <small id="preview-dimensions">{{ object.colunas }}×{{ object.linhas }} grid</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="template-actions-section">
+    <h3>Ações Disponíveis</h3>
+    <div class="action-buttons">
+      <a href="{% url 'relatorios:template_list' %}" class="btn btn-outline">← Voltar à Lista</a>
+      <a href="{% url 'relatorios:template_items' object.pk %}" class="btn btn-secondary">📝 Editar Itens</a>
+      <a href="{% url 'relatorios:pdf_tabloide' %}?template={{ object.pk }}" class="btn btn-export" target="_blank">
+        📄 Gerar PDF
+      </a>
+      <a href="{% url 'relatorios:jpeg_tabloide' %}?template={{ object.pk }}" class="btn btn-export" target="_blank">
+        🖼️ Gerar JPEG
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+// Template data for preview
+let templateData = {
+    colunas: {{ object.colunas|default:3 }},
+    linhas: {{ object.linhas|default:4 }},
+    items: [{% for item in object.itens.all %}{
+        posicao: {{ item.ordem }},
+        nome: "{{ item.produto.nome|escapejs }}",
+        preco: {{ item.produto.preco }}
+    }{% if not forloop.last %},{% endif %}{% endfor %}]
+};
+
+// Ensure we have valid defaults
+if (!templateData.colunas || templateData.colunas <= 0) templateData.colunas = 3;
+if (!templateData.linhas || templateData.linhas <= 0) templateData.linhas = 4;
+if (!templateData.items) templateData.items = [];
+
+function updatePreview() {
+    const colunas = parseInt(document.getElementById('id_colunas').value) || templateData.colunas;
+    const linhas = parseInt(document.getElementById('id_linhas').value) || templateData.linhas;
+    const corPrincipal = document.getElementById('id_cor_fundo_row').value || '{{ object.cor_fundo_row|default:"#FFFFFF" }}';
+    const corAlternada = document.getElementById('id_cor_fundo_alternada').value || '{{ object.cor_fundo_alternada|default:"#FFFFFF" }}';
+    
+    // Update stats
+    document.getElementById('total-positions').textContent = `${colunas * linhas}`;
+    document.getElementById('configured-items').textContent = `${templateData.items.length}`;
+    document.getElementById('free-positions').textContent = `${Math.max(0, (colunas * linhas) - templateData.items.length)}`;
+    document.getElementById('preview-dimensions').textContent = `${colunas} × ${linhas}`;
+    
+    // Generate preview grid
+    const grid = document.getElementById('preview-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${colunas}, 1fr)`;
+    
+    for (let i = 0; i < linhas * colunas; i++) {
+        const position = i + 1;
+        const cell = document.createElement('div');
+        const row = Math.floor(i / colunas);
+        const item = templateData.items.find(item => item.posicao === position);
+        
+        cell.className = item ? 'preview-cell occupied' : 'preview-cell empty';
+        cell.style.backgroundColor = row % 2 === 0 ? corPrincipal : corAlternada;
+        cell.style.minHeight = '45px';
+        cell.style.display = 'flex';
+        cell.style.alignItems = 'center';
+        cell.style.justifyContent = 'center';
+        cell.style.fontSize = '12px';
+        cell.style.border = '1px solid #ddd';
+        
+        if (item) {
+            cell.innerHTML = `<div style="text-align: center;"><strong>${item.nome}</strong><br>R$ ${item.preco}</div>`;
+        } else {
+            cell.textContent = position;
+        }
+        
+        grid.appendChild(cell);
+    }
+}
+
+// Event listeners for real-time preview
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('id_colunas').addEventListener('input', updatePreview);
+    document.getElementById('id_linhas').addEventListener('input', updatePreview);
+    document.getElementById('id_cor_fundo_row').addEventListener('input', updatePreview);
+    document.getElementById('id_cor_fundo_alternada').addEventListener('input', updatePreview);
+    
+    // Initial preview
+    updatePreview();
+});
+
+function removeBackgroundImage() {
+    if (confirm('Deseja remover a imagem de fundo?')) {
+        const fileInput = document.querySelector('[name="background_imagem"]');
+        if (fileInput) fileInput.value = '';
+        const currentImageDiv = document.querySelector('.current-image');
+        if (currentImageDiv) currentImageDiv.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

@@ -1,15 +1,176 @@
 {% extends 'base.html' %}
 {% block title %}Excluir Produto - TabloideMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .delete-page {
+    max-width: 600px;
+    margin: var(--space-2xl) auto;
+    text-align: center;
+  }
+
+  .delete-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .delete-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-lg);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+  }
+
+  .delete-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: var(--space-md);
+  }
+
+  .delete-message {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+    font-size: 1.1rem;
+  }
+
+  .product-info {
+    background: var(--background-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin: var(--space-lg) 0;
+  }
+
+  .product-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-xs);
+  }
+
+  .product-details {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .warning-text {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #d97706;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin: var(--space-lg) 0;
+    font-size: 0.9rem;
+  }
+
+  .delete-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-top: var(--space-xl);
+  }
+
+  .btn-confirm {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 140px;
+  }
+
+  .btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+  }
+
+  .btn-cancel {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+  }
+
+  .btn-cancel:hover {
+    background: var(--background-subtle);
+    border-color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .delete-actions {
+      flex-direction: column;
+    }
+    
+    .delete-container {
+      padding: var(--space-lg);
+      margin: var(--space-lg);
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<section>
-  <h2>Excluir Produto</h2>
-  <p>Tem certeza que deseja excluir <strong>{{ object }}</strong>?</p>
-  <form method="post">
-    {% csrf_token %}
-    <button type="submit">Confirmar</button>
-    <a href="{% url 'relatorios:produto_list' %}">Cancelar</a>
-  </form>
-</section>
+<div class="delete-page">
+  <div class="delete-container">
+    <div class="delete-icon">
+      ⚠️
+    </div>
+    
+    <h1 class="delete-title">Excluir Produto</h1>
+    
+    <p class="delete-message">
+      Tem certeza que deseja excluir este produto?
+    </p>
+    
+    <div class="product-info">
+      <div class="product-name">{{ object.nome }}</div>
+      <div class="product-details">
+        Código: {{ object.codigo }} • Preço: R$ {{ object.preco|floatformat:2 }}
+      </div>
+    </div>
+    
+    <div class="warning-text">
+      <strong>Atenção:</strong> Esta ação não pode ser desfeita. O produto será removido permanentemente do sistema e de todos os templates que o utilizam.
+    </div>
+    
+    <form method="post">
+      {% csrf_token %}
+      <div class="delete-actions">
+        <button type="submit" class="btn-confirm">
+          Sim, Excluir
+        </button>
+        <a href="{% url 'relatorios:produto_list' %}" class="btn-cancel">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 

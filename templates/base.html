@@ -1,95 +1,153 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}TabloideMP{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/modern.css' %}" />
+    {% block extra_css %}{% endblock %}
   </head>
   <body>
-    <header class="site-header">
-      <div class="container">
-        <h1><a href="/">TabloideMP</a></h1>
-        <nav>
-          <a href="{% url 'relatorios:home' %}">Início</a>
-          <a href="{% url 'relatorios:produto_list' %}">Produtos</a>
-          <a href="{% url 'relatorios:importacao' %}">Importação</a>
-          <a href="{% url 'relatorios:template_list' %}">Templates</a>
-          <a href="{% url 'relatorios:empresa_list' %}">Empresas</a>
-          <!-- <a href="{% url 'relatorios:pdf_tabloide' %}">PDF</a> -->
-          <div class="theme-switch" aria-label="Alternar tema">
-            <button
-              id="theme-switch"
-              class="theme-switch-toggle"
-              type="button"
-              role="switch"
-              aria-checked="false"
-              title="Alternar tema claro/escuro"
-            >
-              <span class="icon icon-moon" aria-hidden="true">☀️</span>
-              <span class="icon icon-sun" aria-hidden="true">🌙</span>
-              <span class="knob" aria-hidden="true"></span>
-            </button>
+    <div class="app-layout">
+      <header class="app-header">
+        <div class="container">
+          <div class="header-content">
+            <a href="{% url 'relatorios:home' %}" class="brand">
+              <div class="brand-icon">T</div>
+              <span>TabloideMP</span>
+            </a>
+            
+            <nav class="nav-main">
+              {% if user.is_authenticated %}
+                <ul class="nav-links">
+                  <li><a href="{% url 'relatorios:home' %}" class="nav-link">Dashboard</a></li>
+                  {% if user.is_superuser or user.empresa_profile %}
+                    <li><a href="{% url 'relatorios:produto_list' %}" class="nav-link">Produtos</a></li>
+                    <li><a href="{% url 'relatorios:template_list' %}" class="nav-link">Templates</a></li>
+                    <li><a href="{% url 'relatorios:importacao' %}" class="nav-link">Importação</a></li>
+                  {% endif %}
+                </ul>
+                
+                <div class="user-menu">
+                  <button id="theme-toggle" class="btn btn-icon btn-secondary" title="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                  </button>
+                  
+                  <div class="user-info">
+                    <div class="user-name">{{ user.username }}</div>
+                    <div class="user-role">
+                      {% if user.is_superuser %}
+                        Admin
+                      {% else %}
+                        {% if user.empresa_profile %}
+                          Empresa
+                        {% elif user.cliente_profile %}
+                          Cliente
+                        {% else %}
+                          Usuário
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  </div>
+                  
+                  <div class="user-avatar">
+                    {{ user.username|first|upper }}
+                  </div>
+                  
+                  <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" data-dropdown="user-menu">
+                      ⋮
+                    </button>
+                    <div class="dropdown-menu" id="user-menu">
+                      <a href="{% url 'relatorios:perfil' %}" class="dropdown-item">Meu Perfil</a>
+                      <hr class="dropdown-divider">
+                      <form action="{% url 'relatorios:logout' %}" method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item btn-logout">Sair</button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div class="nav-auth">
+                  <a href="{% url 'relatorios:escolher_area' %}" class="btn btn-primary">Entrar</a>
+                </div>
+              {% endif %}
+            </nav>
           </div>
-          {% if user.is_authenticated %}
-          <span style="margin-left: 8px; opacity: 0.8"
-            >{{ user.username }}</span
-          >
-          <a href="{% url 'relatorios:perfil' %}">Meu Perfil</a>
-          <form
-            action="{% url 'logout' %}"
-            method="post"
-            style="display: inline"
-          >
-            {% csrf_token %}
-            <button
-              type="submit"
-              style="
-                background: none;
-                border: none;
-                color: inherit;
-                cursor: pointer;
-                padding: 0;
-                text-decoration: underline;
-              "
-            >
-              Sair
-            </button>
-          </form>
-          {% else %}
-          <a href="{% url 'login' %}">Login</a>
-          {% endif %}
-        </nav>
-      </div>
-    </header>
+        </div>
+      </header>
 
-    <main class="container">{% block content %}{% endblock %}</main>
+      <main class="app-main">
+        <div class="container{% block container_class %}{% endblock %}">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
 
-    <footer class="site-footer">
-      <div class="container">
-        <small>&copy; {% now 'Y' %} TabloideMP</small>
-      </div>
-    </footer>
+      <footer class="app-footer">
+        <div class="container">
+          <div class="footer-content">
+            <div class="footer-brand">
+              <div class="brand-icon">T</div>
+              <span>TabloideMP</span>
+            </div>
+            <div class="footer-text">
+              <small>&copy; {% now 'Y' %} TabloideMP. Todos os direitos reservados.</small>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Scripts -->
     <script>
-      (function () {
-        const root = document.documentElement;
-        const key = "theme";
-        const sw = document.getElementById("theme-switch");
-        function apply(mode) {
-          const isLight = mode === "light";
-          root.classList.toggle("theme-light", isLight);
-          if (sw) sw.setAttribute("aria-checked", String(isLight));
+      // Theme Toggle
+      (function() {
+        const html = document.documentElement;
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle?.querySelector('.theme-icon');
+        
+        function setTheme(theme) {
+          html.setAttribute('data-theme', theme);
+          localStorage.setItem('theme', theme);
+          if (themeIcon) {
+            themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+          }
         }
-        apply(localStorage.getItem(key) === "light" ? "light" : "dark");
-        if (sw) {
-          sw.addEventListener("click", function () {
-            const isLight = root.classList.toggle("theme-light");
-            localStorage.setItem(key, isLight ? "light" : "dark");
-            sw.setAttribute("aria-checked", String(isLight));
+        
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+        
+        // Theme toggle handler
+        themeToggle?.addEventListener('click', () => {
+          const currentTheme = html.getAttribute('data-theme');
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          setTheme(newTheme);
+        });
+      })();
+
+      // Dropdown functionality
+      document.addEventListener('click', function(e) {
+        const dropdown = e.target.closest('[data-dropdown]');
+        if (dropdown) {
+          const menu = document.getElementById(dropdown.dataset.dropdown);
+          if (menu) {
+            menu.classList.toggle('show');
+          }
+        } else {
+          // Close all dropdowns when clicking outside
+          document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            menu.classList.remove('show');
           });
         }
-      })();
+      });
     </script>
+    
+    {% block extra_js %}{% endblock %}
   </body>
 </html>

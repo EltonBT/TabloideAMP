@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Produto(models.Model):
@@ -31,7 +32,10 @@ class TemplateTabloide(models.Model):
     nome = models.CharField(max_length=100)
     colunas = models.PositiveIntegerField(default=3)
     linhas = models.PositiveIntegerField(default=4)
-    cor_fundo_row = models.CharField(max_length=7, default="#FFFFFF")  # HEX
+    cor_fundo_row = models.CharField(max_length=7, default="#FFFFFF", verbose_name="Cor de fundo principal")  # HEX
+    cor_fundo_alternada = models.CharField(
+        max_length=7, default="#FFFFFF", blank=True, verbose_name="Cor de fundo alternada"
+    )  # HEX para intercalado
     background_imagem = models.ImageField(
         upload_to="backgrounds/", blank=True, null=True
     )
@@ -53,7 +57,7 @@ class ItemTabloide(models.Model):
 
     class Meta:
         ordering = ["ordem"]
-        unique_together = ("template", "produto")
+        unique_together = [("template", "produto"), ("template", "ordem")]
 
     def __str__(self) -> str:
         return f"{self.template.nome} - {self.produto.nome}"
@@ -89,6 +93,7 @@ class ThemeSettings(models.Model):
 
 
 class Empresa(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='empresa_profile', null=True, blank=True)
     razao_social = models.CharField(max_length=200)
     nome_fantasia = models.CharField(max_length=200, blank=True)
     cnpj = models.CharField(max_length=18, unique=True)
@@ -108,3 +113,21 @@ class Empresa(models.Model):
 
     def __str__(self) -> str:
         return f"{self.razao_social} ({self.cnpj})"
+
+
+class UsuarioCliente(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cliente_profile', null=True, blank=True)
+    nome_completo = models.CharField(max_length=200)
+    telefone = models.CharField(max_length=30, blank=True)
+    cpf = models.CharField(max_length=14, unique=True, blank=True, null=True)
+    empresa_associada = models.ForeignKey(Empresa, on_delete=models.SET_NULL, blank=True, null=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nome_completo"]
+        verbose_name = "Cliente"
+        verbose_name_plural = "Clientes"
+
+    def __str__(self) -> str:
+        return f"{self.nome_completo} ({self.user.username})"

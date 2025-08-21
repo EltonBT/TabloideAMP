@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% block title %}Escolher Área de Acesso - TabloideMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-layout {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    margin: 0 -1rem;
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .auth-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    max-width: 900px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .auth-hero {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .auth-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: var(--space-sm);
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .auth-subtitle {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--space-md);
+  }
+
+  .user-status {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .user-status.warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+  }
+
+  .user-status.admin {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+
+  .status-message {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--space-md);
+  }
+
+  .warning-text {
+    color: #fcd34d;
+    font-weight: 500;
+  }
+
+  .admin-actions {
+    margin-top: var(--space-md);
+  }
+
+  .access-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-xl);
+    margin-top: var(--space-xl);
+  }
+
+  .access-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .access-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  }
+
+  .access-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .card-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-lg);
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+  }
+
+  .empresa .card-icon {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  }
+
+  .cliente .card-icon {
+    background: linear-gradient(135deg, #10b981, #34d399);
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-inverse);
+    margin-bottom: var(--space-md);
+  }
+
+  .card-description {
+    color: #6b7280;
+    margin-bottom: var(--space-xl);
+    line-height: 1.6;
+  }
+
+  .card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .btn-auth {
+    padding: var(--space-md) var(--space-xl);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+  }
+
+  .btn-auth-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+  }
+
+  .btn-auth-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-auth-secondary {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+  }
+
+  .btn-auth-secondary:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .auth-title {
+      font-size: 2rem;
+    }
+    
+    .access-cards {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+    
+    .auth-container {
+      padding: var(--space-lg);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-container">
+    <div class="auth-hero">
+      <h1 class="auth-title">TabloideMP</h1>
+      <p class="auth-subtitle">Sistema de Gestão de Tabloides</p>
+    </div>
+    
+    {% if user_without_profile %}
+      <div class="user-status warning">
+        <div class="status-message">
+          <strong>Olá, {{ user.username }}!</strong>
+        </div>
+        <p class="warning-text">Você está logado mas não tem um perfil configurado. Escolha uma das opções abaixo para criar seu perfil:</p>
+      </div>
+    {% elif is_admin %}
+      <div class="user-status admin">
+        <div class="status-message">
+          <strong>Bem-vindo, administrador {{ user.username }}!</strong>
+        </div>
+        <p>Você tem acesso total ao sistema. Escolha uma área ou acesse o painel administrativo:</p>
+        <div class="admin-actions">
+          <a href="/admin/" class="btn btn-primary btn-auth">Painel Administrativo</a>
+        </div>
+      </div>
+    {% else %}
+      <p class="auth-subtitle">Escolha sua área de acesso para continuar</p>
+    {% endif %}
+    
+    <div class="access-cards">
+      <div class="access-card empresa">
+        <div class="card-icon">🏢</div>
+        <h2 class="card-title">Área da Empresa</h2>
+        <p class="card-description">
+          Gerencie produtos, crie templates personalizados e gere relatórios profissionais para seu negócio.
+        </p>
+        <div class="card-actions">
+          <a href="{% url 'relatorios:empresa_login' %}" class="btn btn-auth-primary btn-auth">
+            Entrar como Empresa
+          </a>
+          <a href="{% url 'relatorios:empresa_signup' %}" class="btn btn-auth-secondary btn-auth">
+            Cadastrar Empresa
+          </a>
+        </div>
+      </div>
+      
+      <div class="access-card cliente">
+        <div class="card-icon">👤</div>
+        <h2 class="card-title">Área do Cliente</h2>
+        <p class="card-description">
+          Visualize tabloides, acompanhe promoções e acesse informações compartilhadas pelas empresas.
+        </p>
+        <div class="card-actions">
+          <a href="{% url 'relatorios:cliente_login' %}" class="btn btn-auth-primary btn-auth">
+            Entrar como Cliente
+          </a>
+          <a href="{% url 'relatorios:cliente_signup' %}" class="btn btn-auth-secondary btn-auth">
+            Cadastrar Cliente
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block title %}Cadastro de Cliente - TabloideMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-layout {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    margin: 0 -1rem;
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .auth-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .auth-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: var(--space-sm);
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .auth-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0;
+  }
+
+  .form-section {
+    margin-bottom: var(--space-xl);
+    padding: var(--space-lg);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .form-section h3 {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space-lg);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: var(--space-sm);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  }
+
+  .form-error {
+    color: #fca5a5;
+    font-size: 0.875rem;
+    margin-top: var(--space-xs);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin: var(--space-xl) 0;
+  }
+
+  .btn-auth {
+    padding: var(--space-md) var(--space-xl);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+    transition: var(--transition);
+    text-decoration: none;
+  }
+
+  .btn-auth:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-auth.secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .auth-footer {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .auth-footer a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+
+  .auth-footer a:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+    .auth-container {
+      padding: var(--space-lg);
+    }
+    
+    .auth-title {
+      font-size: 1.75rem;
+    }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1 class="auth-title">Cadastro de Cliente</h1>
+      <p class="auth-subtitle">Registre-se como cliente no TabloideMP</p>
+    </div>
+    
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+      
+      <div class="form-section">
+        <h3>Informações Pessoais</h3>
+        
+        <div class="form-group">
+          <label for="{{ form.nome_completo.id_for_label }}">{{ form.nome_completo.label }}</label>
+          {{ form.nome_completo }}
+          {% if form.nome_completo.errors %}
+            <div class="form-error">{{ form.nome_completo.errors }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.cpf.id_for_label }}">{{ form.cpf.label }}</label>
+            {{ form.cpf }}
+            {% if form.cpf.errors %}
+              <div class="form-error">{{ form.cpf.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+            {{ form.telefone }}
+            {% if form.telefone.errors %}
+              <div class="form-error">{{ form.telefone.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="form-error">{{ form.email.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Dados de Acesso</h3>
+        
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="form-error">{{ form.username.errors }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+              <div class="form-error">{{ form.password1.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+              <div class="form-error">{{ form.password2.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-auth">Cadastrar Cliente</button>
+        <a href="{% url 'relatorios:escolher_area' %}" class="btn btn-auth secondary">Voltar</a>
+      </div>
+    </form>
+    
+    <div class="auth-footer">
+      <p>Já tem cadastro? <a href="{% url 'relatorios:cliente_login' %}">Faça login</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

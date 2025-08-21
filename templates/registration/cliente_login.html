@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block title %}Login Cliente - TabloideMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-layout {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    margin: 0 -1rem;
+    padding: var(--space-2xl) var(--space-md);
+  }
+
+  .auth-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    max-width: 450px;
+    width: 100%;
+  }
+
+  .auth-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .auth-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: var(--space-sm);
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .auth-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0;
+  }
+
+  .auth-form {
+    margin-bottom: var(--space-xl);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  }
+
+  .alert {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-error {
+    color: #fca5a5;
+    font-size: 0.875rem;
+    margin-top: var(--space-xs);
+  }
+
+  .btn-auth {
+    width: 100%;
+    padding: var(--space-md) var(--space-xl);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+    transition: var(--transition);
+    margin-bottom: var(--space-lg);
+  }
+
+  .btn-auth:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .auth-footer {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .auth-footer a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+
+  .auth-footer a:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: underline;
+  }
+
+  .auth-footer p {
+    margin-bottom: var(--space-sm);
+  }
+
+  .auth-footer p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 768px) {
+    .auth-container {
+      padding: var(--space-lg);
+    }
+    
+    .auth-title {
+      font-size: 1.75rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-container">
+    <div class="auth-header">
+      <h1 class="auth-title">Área do Cliente</h1>
+      <p class="auth-subtitle">Faça login para acessar a área do cliente</p>
+    </div>
+    
+    <form method="post" class="auth-form">
+      {% csrf_token %}
+      
+      {% if form.errors %}
+        <div class="alert">
+          <p>Erro no login. Verifique suas credenciais.</p>
+        </div>
+      {% endif %}
+      
+      <div class="form-group">
+        <label for="{{ form.username.id_for_label }}">Nome de usuário</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="form-error">{{ form.username.errors }}</div>
+        {% endif %}
+      </div>
+      
+      <div class="form-group">
+        <label for="{{ form.password.id_for_label }}">Senha</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+          <div class="form-error">{{ form.password.errors }}</div>
+        {% endif %}
+      </div>
+      
+      <button type="submit" class="btn btn-auth">Entrar</button>
+    </form>
+    
+    <div class="auth-footer">
+      <p>Não tem cadastro? <a href="{% url 'relatorios:cliente_signup' %}">Cadastre-se como cliente</a></p>
+      <p><a href="{% url 'relatorios:escolher_area' %}">← Voltar à seleção de área</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,32 +1,271 @@
 {% extends 'base.html' %}
 {% block title %}Produtos - TabloideMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .products-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .products-table th {
+    background: var(--background-subtle);
+    color: var(--text);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .products-table td {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text);
+  }
+
+  .products-table tr:hover {
+    background: var(--background-subtle);
+  }
+
+  .products-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .product-code {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: var(--background-subtle);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+  }
+
+  .product-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .product-price {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1.1rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .btn-action {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.875rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+
+  .btn-edit {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  .btn-edit:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--text-secondary);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    color: var(--text);
+  }
+
+  .empty-state p {
+    margin-bottom: var(--space-lg);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .actions {
+      flex-direction: column;
+    }
+
+    .products-table {
+      font-size: 0.875rem;
+    }
+
+    .products-table th,
+    .products-table td {
+      padding: var(--space-md);
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<section>
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <h2>Produtos</h2>
-    <a href="{% url 'relatorios:produto_create' %}">Novo Produto</a>
+<div class="products-page">
+  <div class="page-header">
+    <h1 class="page-title">Gerenciar Produtos</h1>
+    <a href="{% url 'relatorios:produto_create' %}" class="btn btn-primary">
+      <span>+</span> Novo Produto
+    </a>
   </div>
-  <table style="width:100%;border-collapse:collapse;">
-    <thead>
-      <tr><th>Código</th><th>Nome</th><th>Preço</th><th></th></tr>
-    </thead>
-    <tbody>
-      {% for p in object_list %}
-      <tr>
-        <td>{{ p.codigo }}</td>
-        <td>{{ p.nome }}</td>
-        <td>R$ {{ p.preco|floatformat:2 }}</td>
-        <td>
-          <a href="{% url 'relatorios:produto_update' p.pk %}">Editar</a>
-          <a href="{% url 'relatorios:produto_delete' p.pk %}">Excluir</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="4">Nenhum produto.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ object_list|length }}</div>
+      <div class="stat-label">Total de Produtos</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Categorias</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Em Promoção</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Sem Estoque</div>
+    </div>
+  </div>
+
+  <div class="products-container">
+    {% if object_list %}
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome do Produto</th>
+            <th>Preço</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for produto in object_list %}
+            <tr>
+              <td>
+                <span class="product-code">{{ produto.codigo }}</span>
+              </td>
+              <td class="product-name">{{ produto.nome }}</td>
+              <td class="product-price">R$ {{ produto.preco|floatformat:2 }}</td>
+              <td>
+                <div class="actions">
+                  <a href="{% url 'relatorios:produto_update' produto.pk %}" class="btn-action btn-edit">
+                    Editar
+                  </a>
+                  <a href="{% url 'relatorios:produto_delete' produto.pk %}" class="btn-action btn-delete">
+                    Excluir
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">📦</div>
+        <h3>Nenhum produto cadastrado</h3>
+        <p>Comece criando seu primeiro produto para gerar tabloides incríveis.</p>
+        <a href="{% url 'relatorios:produto_create' %}" class="btn btn-primary">
+          Criar Primeiro Produto
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
 
 
