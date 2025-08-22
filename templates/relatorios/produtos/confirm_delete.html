@@ -1,7 +1,5 @@
-{% extends 'base.html' %}
-{% block title %}Excluir Produto - TabloideMP{% endblock %}
-
-{% block extra_css %}
+{% extends 'base.html' %} {% block title %}Excluir Produto - TabloideAMP{%
+endblock %} {% block extra_css %}
 <style>
   .delete-page {
     max-width: 600px;
@@ -10,7 +8,6 @@
   }
 
   .delete-container {
-    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: var(--space-2xl);
@@ -125,45 +122,39 @@
     .delete-actions {
       flex-direction: column;
     }
-    
+
     .delete-container {
       padding: var(--space-lg);
       margin: var(--space-lg);
     }
   }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="delete-page">
   <div class="delete-container">
-    <div class="delete-icon">
-      ⚠️
-    </div>
-    
+    <div class="delete-icon">⚠️</div>
+
     <h1 class="delete-title">Excluir Produto</h1>
-    
-    <p class="delete-message">
-      Tem certeza que deseja excluir este produto?
-    </p>
-    
+
+    <p class="delete-message">Tem certeza que deseja excluir este produto?</p>
+
     <div class="product-info">
       <div class="product-name">{{ object.nome }}</div>
       <div class="product-details">
         Código: {{ object.codigo }} • Preço: R$ {{ object.preco|floatformat:2 }}
       </div>
     </div>
-    
+
     <div class="warning-text">
-      <strong>Atenção:</strong> Esta ação não pode ser desfeita. O produto será removido permanentemente do sistema e de todos os templates que o utilizam.
+      <strong>Atenção:</strong> Esta ação não pode ser desfeita. O produto será
+      removido permanentemente do sistema e de todos os templates que o
+      utilizam.
     </div>
-    
+
     <form method="post">
       {% csrf_token %}
       <div class="delete-actions">
-        <button type="submit" class="btn-confirm">
-          Sim, Excluir
-        </button>
+        <button type="submit" class="btn-confirm">Sim, Excluir</button>
         <a href="{% url 'relatorios:produto_list' %}" class="btn-cancel">
           Cancelar
         </a>
@@ -172,5 +163,3 @@
   </div>
 </div>
 {% endblock %}
-
-

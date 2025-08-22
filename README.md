@@ -1,1 +1,1 @@
-# TabloideMP
+# TabloideAMP

@@ -130,7 +130,7 @@ def escolher_area(request: HttpRequest) -> HttpResponse:
             context['is_admin'] = True
             context['user'] = request.user
         else:
-            # Verificar tipo de usuário e redirecionar
+            # Verificar tipo de usuário e redirecionar automaticamente
             try:
                 empresa = request.user.empresa_profile
                 return redirect("relatorios:empresa_dashboard")
@@ -341,24 +341,45 @@ class TemplateTabloideUpdateView(EmpresaRequiredMixin, UpdateView):
         return context
 
 
+class TemplateTabloideDeleteView(EmpresaRequiredMixin, DeleteView):
+    model = TemplateTabloide
+    template_name = "relatorios/tabloide/template_confirm_delete.html"
+    success_url = reverse_lazy("relatorios:template_list")
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_positions'] = self.object.colunas * self.object.linhas
+        return context
+
+
 @empresa_required
 def gerenciar_itens_tabloide(request: HttpRequest, pk: int) -> HttpResponse:
     template = get_object_or_404(TemplateTabloide, pk=pk)
+    
     if request.method == "POST":
-        if not request.user.has_perm("relatorios.change_templatetabloide"):
-            return redirect("login")
         form = ItemTabloideForm(request.POST, template=template)
         if form.is_valid():
-            form.save()
-            return redirect("relatorios:template_items", pk=template.pk)
+            try:
+                form.save()
+                return redirect("relatorios:template_items", pk=template.pk)
+            except Exception as e:
+                # Handle unique constraint error specifically
+                if "UNIQUE constraint failed" in str(e):
+                    form.add_error('ordem', 
+                        f'❌ A posição {form.cleaned_data.get("ordem")} já está ocupada. '
+                        'Escolha uma posição diferente.')
+                else:
+                    form.add_error(None, f"❌ Erro ao salvar o item: {str(e)}")
     else:
         form = ItemTabloideForm(template=template)
+    
     itens = template.itens.select_related("produto").all()
-    return render(
-        request,
-        "relatorios/tabloide/itens.html",
-        {"template": template, "form": form, "itens": itens},
-    )
+    context = {
+        "template": template, 
+        "form": form, 
+        "itens": itens
+    }
+    return render(request, "relatorios/tabloide/itens.html", context)
 
 
 @empresa_required
@@ -669,7 +690,7 @@ def gerar_pdf_exemplo(request: HttpRequest) -> HttpResponse:
 
     # Cabeçalho
     pdf.setFont("Helvetica-Bold", 16)
-    pdf.drawString(x0, y_top, "TabloideMP")
+    pdf.drawString(x0, y_top, "TabloideAMP")
     pdf.setFont("Helvetica", 10)
     pdf.drawString(
         x0, y_top - 16, "CNPJ: 00.000.000/0000-00 • contato@tabloidemp.local"

@@ -78,6 +78,11 @@ urlpatterns = [
         name="template_update",
     ),
     path(
+        "tabloide/templates/<int:pk>/excluir/",
+        views.TemplateTabloideDeleteView.as_view(),
+        name="template_delete",
+    ),
+    path(
         "tabloide/templates/<int:pk>/itens/",
         views.gerenciar_itens_tabloide,
         name="template_items",

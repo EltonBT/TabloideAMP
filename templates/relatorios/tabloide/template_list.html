@@ -1,7 +1,5 @@
-{% extends 'base.html' %}
-{% block title %}Templates de Tabloide - TabloideMP{% endblock %}
-
-{% block extra_css %}
+{% extends 'base.html' %} {% block title %}Templates de Tabloide - TabloideAMP
+{%endblock %} {% block extra_css %}
 <style>
   .templates-page {
     padding: var(--space-xl) 0;
@@ -30,7 +28,6 @@
   }
 
   .template-card {
-    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: var(--space-xl);
@@ -40,7 +37,7 @@
   }
 
   .template-card::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -161,9 +158,9 @@
     transition: var(--transition);
     flex: 1;
   }
-  
+
   .btn-template.primary {
-    background: var(--primary);
+    background: linear-gradient(151deg, #0202042b, var(--primary-dark));;
     color: white;
     border: 1px solid var(--primary);
   }
@@ -182,6 +179,18 @@
   .btn-template.secondary:hover {
     background: var(--background-subtle);
     border-color: var(--text);
+  }
+
+  .btn-template.danger {
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-template.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    transform: translateY(-1px);
   }
 
   .btn-export {
@@ -207,7 +216,7 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: var(--space-3xl);
-    background: var(--surface);
+
     border: 2px dashed var(--border);
     border-radius: var(--radius-lg);
   }
@@ -238,7 +247,6 @@
   }
 
   .stat-card {
-    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
@@ -290,9 +298,7 @@
     }
   }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="templates-page">
   <div class="page-header">
     <h1 class="page-title">Templates de Tabloide</h1>
@@ -306,10 +312,10 @@
       <div class="stat-number">{{ object_list|length }}</div>
       <div class="stat-label">Templates Criados</div>
     </div>
-    <div class="stat-card">
+    <!-- <div class="stat-card">
       <div class="stat-number">{% for t in object_list %}{{ t.itens.count }}{% if not forloop.last %}+{% endif %}{% endfor %}</div>
       <div class="stat-label">Itens Cadastrados</div>
-    </div>
+    </div> -->
     <div class="stat-card">
       <div class="stat-number">0</div>
       <div class="stat-label">Exportações Hoje</div>
@@ -322,75 +328,118 @@
 
   <div class="template-grid">
     {% for template in object_list %}
-      <div class="template-card">
-        <div class="template-header">
-          <h3 class="template-title">{{ template.nome }}</h3>
-          <div class="template-badge">{{ template.itens.count }} item{{ template.itens.count|pluralize:"s" }}</div>
-        </div>
-        
-        <div class="template-info">
-          <div class="info-item">
-            <span class="info-label">Dimensões</span>
-            <span class="info-value">{{ template.colunas }} × {{ template.linhas }}</span>
-          </div>
-          
-          <div class="info-item">
-            <span class="info-label">Esquema de Cores</span>
-            <div class="color-preview">
-              <div class="color-item">
-                <span class="color-sample" style="background-color: {{ template.cor_fundo_row }}" title="Cor principal: {{ template.cor_fundo_row }}"></span>
-                <span class="color-label">Principal</span>
-              </div>
-              {% if template.cor_fundo_alternada and template.cor_fundo_alternada != '#FFFFFF' %}
-                <div class="color-item">
-                  <span class="color-sample" style="background-color: {{ template.cor_fundo_alternada }}" title="Cor alternada: {{ template.cor_fundo_alternada }}"></span>
-                  <span class="color-label">Alternada</span>
-                </div>
-              {% else %}
-                <div class="color-item">
-                  <span class="color-sample" style="background-color: #FFFFFF" title="Cor alternada: Branco (padrão)"></span>
-                  <span class="color-label">Alternada</span>
-                </div>
-              {% endif %}
-            </div>
-          </div>
-          
-          {% if template.background_imagem %}
-            <div class="info-item">
-              <span class="info-label">Imagem de Fundo</span>
-              <span class="info-value">✓ Configurada</span>
-            </div>
-          {% endif %}
-        </div>
-        
-        <div class="template-actions">
-          <div class="action-row">
-            <a href="{% url 'relatorios:template_update' template.pk %}" class="btn-template primary">Editar Template</a>
-            <a href="{% url 'relatorios:template_items' template.pk %}" class="btn-template secondary">Gerenciar Itens</a>
-          </div>
-          
-          <div class="template-export">
-            <a href="{% url 'relatorios:pdf_tabloide' %}?template={{ template.pk }}" class="btn-export" target="_blank" title="Exportar como PDF">
-              📄 PDF
-            </a>
-            <a href="{% url 'relatorios:jpeg_tabloide' %}?template={{ template.pk }}" class="btn-export" target="_blank" title="Exportar como JPEG">
-              🖼️ JPEG
-            </a>
-          </div>
+    <div class="template-card">
+      <div class="template-header">
+        <h3 class="template-title">{{ template.nome }}</h3>
+        <div class="template-badge">
+          {{ template.itens.count }} item{{ template.itens.count|pluralize:"s" }}
         </div>
       </div>
+
+      <div class="template-info">
+        <div class="info-item">
+          <span class="info-label">Dimensões</span>
+          <span class="info-value"
+            >{{ template.colunas }} × {{ template.linhas }}</span
+          >
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Esquema de Cores</span>
+          <div class="color-preview">
+            <div class="color-item">
+              <span
+                class="color-sample"
+                style="background-color: {{ template.cor_fundo_row }}"
+                title="Cor principal: {{ template.cor_fundo_row }}"
+              ></span>
+              <span class="color-label">Principal</span>
+            </div>
+            {% if template.cor_fundo_alternada and template.cor_fundo_alternada != '#FFFFFF' %}
+            <div class="color-item">
+              <span
+                class="color-sample"
+                style="background-color: {{ template.cor_fundo_alternada }}"
+                title="Cor alternada: {{ template.cor_fundo_alternada }}"
+              ></span>
+              <span class="color-label">Alternada</span>
+            </div>
+            {% else %}
+            <div class="color-item">
+              <span
+                class="color-sample"
+                style="background-color: #ffffff"
+                title="Cor alternada: Branco (padrão)"
+              ></span>
+              <span class="color-label">Alternada</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if template.background_imagem %}
+        <div class="info-item">
+          <span class="info-label">Imagem de Fundo</span>
+          <span class="info-value">✓ Configurada</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="template-actions">
+        <div class="action-row">
+          <a
+            href="{% url 'relatorios:template_update' template.pk %}"
+            class="btn-template primary"
+            >Editar Template</a
+          >
+          <a
+            href="{% url 'relatorios:template_items' template.pk %}"
+            class="btn-template secondary"
+            >Gerenciar Itens</a
+          >
+        </div>
+        
+        <div class="action-row">
+          <a
+            href="{% url 'relatorios:template_delete' template.pk %}"
+            class="btn-template danger"
+            >🗑️ Excluir Template</a
+          >
+        </div>
+
+        <div class="template-export">
+          <a
+            href="{% url 'relatorios:pdf_tabloide' %}?template={{ template.pk }}"
+            class="btn-export"
+            target="_blank"
+            title="Exportar como PDF"
+          >
+            📄 PDF
+          </a>
+          <a
+            href="{% url 'relatorios:jpeg_tabloide' %}?template={{ template.pk }}"
+            class="btn-export"
+            target="_blank"
+            title="Exportar como JPEG"
+          >
+            🖼️ JPEG
+          </a>
+        </div>
+      </div>
+    </div>
     {% empty %}
-      <div class="empty-state">
-        <div class="empty-state-icon">📋</div>
-        <h3>Nenhum template criado ainda</h3>
-        <p>Crie seu primeiro template de tabloide para começar a gerar relatórios profissionais</p>
-        <a href="{% url 'relatorios:template_create' %}" class="btn btn-primary">
-          Criar Primeiro Template
-        </a>
-      </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h3>Nenhum template criado ainda</h3>
+      <p>
+        Crie seu primeiro template de tabloide para começar a gerar relatórios
+        profissionais
+      </p>
+      <a href="{% url 'relatorios:template_create' %}" class="btn btn-primary">
+        Criar Primeiro Template
+      </a>
+    </div>
     {% endfor %}
   </div>
 </div>
 {% endblock %}
-
-

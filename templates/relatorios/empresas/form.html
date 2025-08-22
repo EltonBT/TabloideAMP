@@ -1,14 +1,506 @@
 {% extends 'base.html' %}
-{% block title %}Empresa - TabloideMP{% endblock %}
+{% block title %}{% if object %}Editar Empresa{% else %}Nova Empresa{% endif %} - TabloideAMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--space-xl) 0;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: var(--space-sm);
+  }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .form-container {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    margin-bottom: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .form-section {
+    margin-bottom: var(--space-xl);
+  }
+
+  .form-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .section-icon {
+    font-size: 1.5rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+    color: var(--text);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .form-group input:hover,
+  .form-group select:hover,
+  .form-group textarea:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .form-group .helptext {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+    font-style: italic;
+  }
+
+  .form-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid #ef4444;
+  }
+
+  .required-field {
+    position: relative;
+  }
+
+  .required-field label::after {
+    content: ' *';
+    color: #ef4444;
+    font-weight: bold;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-save {
+    background: linear-gradient(151deg, #0202042b, var(--primary-dark));
+    color: white;
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
+  .btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-cancel {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    min-width: 140px;
+  }
+
+  .btn-cancel:hover {
+    background: var(--background-subtle);
+    border-color: var(--text-secondary);
+  }
+
+  .file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .file-input-wrapper input[type="file"] {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+  }
+
+  .file-input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: var(--background-subtle);
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    color: var(--text-secondary);
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .file-input-label:hover {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.05);
+    color: var(--primary);
+  }
+
+  .file-icon {
+    font-size: 2rem;
+  }
+
+  .input-group {
+    position: relative;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+  }
+
+  .input-group input {
+    padding-left: calc(var(--space-md) * 2.5);
+    border: 2px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .input-group input:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .success-message {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  @media (max-width: 768px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+    
+    .form-actions {
+      flex-direction: column;
+    }
+    
+    .form-container {
+      padding: var(--space-lg);
+    }
+    
+    .page-title {
+      font-size: 1.75rem;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<section>
-  <h2>{{ object|default:'Nova Empresa' }}</h2>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Salvar</button>
-  </form>
-</section>
+<div class="form-page">
+  <div class="page-header">
+    <h1 class="page-title">
+      {% if object %}
+        🏢 Editar Empresa
+      {% else %}
+        🏢 Nova Empresa
+      {% endif %}
+    </h1>
+    <p class="page-subtitle">
+      {% if object %}
+        Atualize as informações da empresa
+      {% else %}
+        Cadastre uma nova empresa no sistema
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="form-container">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div class="form-section">
+        <h3 class="section-title">
+          <span class="section-icon">🏢</span>
+          Informações da Empresa
+        </h3>
+        
+        <div class="form-grid">
+          <div class="form-group required-field">
+            <label for="{{ form.razao_social.id_for_label }}">{{ form.razao_social.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">🏢</span>
+              {{ form.razao_social }}
+            </div>
+            {% if form.razao_social.help_text %}
+              <div class="helptext">{{ form.razao_social.help_text }}</div>
+            {% endif %}
+            {% if form.razao_social.errors %}
+              <div class="form-error">{{ form.razao_social.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.nome_fantasia.id_for_label }}">{{ form.nome_fantasia.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">🏷️</span>
+              {{ form.nome_fantasia }}
+            </div>
+            {% if form.nome_fantasia.help_text %}
+              <div class="helptext">{{ form.nome_fantasia.help_text }}</div>
+            {% endif %}
+            {% if form.nome_fantasia.errors %}
+              <div class="form-error">{{ form.nome_fantasia.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group required-field">
+            <label for="{{ form.cnpj.id_for_label }}">{{ form.cnpj.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">💼</span>
+              {{ form.cnpj }}
+            </div>
+            {% if form.cnpj.help_text %}
+              <div class="helptext">{{ form.cnpj.help_text }}</div>
+            {% endif %}
+            {% if form.cnpj.errors %}
+              <div class="form-error">{{ form.cnpj.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.ie.id_for_label }}">{{ form.ie.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">📄</span>
+              {{ form.ie }}
+            </div>
+            {% if form.ie.help_text %}
+              <div class="helptext">{{ form.ie.help_text }}</div>
+            {% endif %}
+            {% if form.ie.errors %}
+              <div class="form-error">{{ form.ie.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3 class="section-title">
+          <span class="section-icon">📞</span>
+          Contato
+        </h3>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">✉️</span>
+              {{ form.email }}
+            </div>
+            {% if form.email.help_text %}
+              <div class="helptext">{{ form.email.help_text }}</div>
+            {% endif %}
+            {% if form.email.errors %}
+              <div class="form-error">{{ form.email.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">📞</span>
+              {{ form.telefone }}
+            </div>
+            {% if form.telefone.help_text %}
+              <div class="helptext">{{ form.telefone.help_text }}</div>
+            {% endif %}
+            {% if form.telefone.errors %}
+              <div class="form-error">{{ form.telefone.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3 class="section-title">
+          <span class="section-icon">📍</span>
+          Endereço
+        </h3>
+        
+        <div class="form-group">
+          <label for="{{ form.endereco.id_for_label }}">{{ form.endereco.label }}</label>
+          <div class="input-group">
+            <span class="input-icon">📍</span>
+            {{ form.endereco }}
+          </div>
+          {% if form.endereco.help_text %}
+            <div class="helptext">{{ form.endereco.help_text }}</div>
+          {% endif %}
+          {% if form.endereco.errors %}
+            <div class="form-error">{{ form.endereco.errors }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="{{ form.cidade.id_for_label }}">{{ form.cidade.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">🏦</span>
+              {{ form.cidade }}
+            </div>
+            {% if form.cidade.help_text %}
+              <div class="helptext">{{ form.cidade.help_text }}</div>
+            {% endif %}
+            {% if form.cidade.errors %}
+              <div class="form-error">{{ form.cidade.errors }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.uf.id_for_label }}">{{ form.uf.label }}</label>
+            <div class="input-group">
+              <span class="input-icon">🗺️</span>
+              {{ form.uf }}
+            </div>
+            {% if form.uf.help_text %}
+              <div class="helptext">{{ form.uf.help_text }}</div>
+            {% endif %}
+            {% if form.uf.errors %}
+              <div class="form-error">{{ form.uf.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="{{ form.cep.id_for_label }}">{{ form.cep.label }}</label>
+          <div class="input-group">
+            <span class="input-icon">📮</span>
+            {{ form.cep }}
+          </div>
+          {% if form.cep.help_text %}
+            <div class="helptext">{{ form.cep.help_text }}</div>
+          {% endif %}
+          {% if form.cep.errors %}
+            <div class="form-error">{{ form.cep.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn-save">
+          <span>💾</span>
+          {% if object %}Atualizar{% else %}Cadastrar{% endif %} Empresa
+        </button>
+        <a href="{% url 'relatorios:empresa_list' %}" class="btn-cancel">
+          <span>←</span>
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}
 
 

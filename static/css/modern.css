@@ -429,7 +429,8 @@ body {
 }
 
 .form-error {
-  color: var(--error);
+  color: var(--error);  
+  background: var(--bg-primary);
   font-size: 0.75rem;
   margin-top: var(--space-xs);
 }

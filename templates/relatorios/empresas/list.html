@@ -1,32 +1,374 @@
 {% extends 'base.html' %}
-{% block title %}Empresas - TabloideMP{% endblock %}
+{% block title %}Empresas - TabloideAMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .empresas-page {
+    padding: var(--space-xl) 0;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .page-icon {
+    font-size: 2.5rem;
+  }
+
+  .empresas-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .empresas-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .empresas-table th {
+    background: var(--background-subtle);
+    color: var(--text);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .empresas-table td {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .empresas-table tr:hover {
+    background: var(--background-subtle);
+  }
+
+  .empresas-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .empresa-name {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-xs);
+  }
+
+  .empresa-fantasia {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .empresa-cnpj {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: var(--background-subtle);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+  }
+
+  .empresa-location {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--text-secondary);
+  }
+
+  .location-icon {
+    font-size: 0.875rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  .btn-action {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.875rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .btn-edit {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  .btn-edit:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--text-secondary);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    color: var(--text);
+  }
+
+  .empty-state p {
+    margin-bottom: var(--space-lg);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .stat-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--space-xs);
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .filter-bar {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .actions {
+      flex-direction: column;
+    }
+
+    .empresas-table {
+      font-size: 0.875rem;
+    }
+
+    .empresas-table th,
+    .empresas-table td {
+      padding: var(--space-md);
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filter-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<section>
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <h2>Empresas</h2>
-    <a href="{% url 'relatorios:empresa_create' %}">Nova Empresa</a>
+<div class="empresas-page">
+  <div class="page-header">
+    <h1 class="page-title">
+      <span class="page-icon">🏢</span>
+      Gerenciar Empresas
+    </h1>
+    <a href="{% url 'relatorios:empresa_create' %}" class="btn btn-primary">
+      <span>+</span> Nova Empresa
+    </a>
   </div>
-  <table style="width:100%;border-collapse:collapse;">
-    <thead>
-      <tr><th>Razão Social</th><th>CNPJ</th><th>Cidade/UF</th><th></th></tr>
-    </thead>
-    <tbody>
-      {% for e in object_list %}
-      <tr>
-        <td>{{ e.razao_social }}</td>
-        <td>{{ e.cnpj }}</td>
-        <td>{{ e.cidade }}{% if e.uf %}/{{ e.uf }}{% endif %}</td>
-        <td>
-          <a href="{% url 'relatorios:empresa_update' e.pk %}">Editar</a>
-          <a href="{% url 'relatorios:empresa_delete' e.pk %}">Excluir</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="4">Nenhuma empresa.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ object_list|length }}</div>
+      <div class="stat-label">Empresas Cadastradas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ object_list|length }}</div>
+      <div class="stat-label">Empresas Ativas</div>
+    </div>
+    <!-- <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Templates Criados</div>
+    </div> -->
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Relatórios Gerados</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <span>🔍</span>
+    <input type="text" placeholder="Buscar empresas por nome, CNPJ ou cidade..." class="search-input" id="search-empresas">
+  </div>
+
+  <div class="empresas-container">
+    {% if object_list %}
+      <table class="empresas-table">
+        <thead>
+          <tr>
+            <th>🏢 Empresa</th>
+            <th>💼 CNPJ</th>
+            <th>📍 Localização</th>
+            <th>🔧 Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for empresa in object_list %}
+            <tr class="empresa-row" data-search="{{ empresa.razao_social|lower }} {{ empresa.nome_fantasia|lower }} {{ empresa.cnpj }} {{ empresa.cidade|lower }}">
+              <td>
+                <div class="empresa-name">{{ empresa.razao_social }}</div>
+                {% if empresa.nome_fantasia %}
+                  <div class="empresa-fantasia">{{ empresa.nome_fantasia }}</div>
+                {% endif %}
+              </td>
+              <td>
+                <span class="empresa-cnpj">{{ empresa.cnpj }}</span>
+              </td>
+              <td>
+                <div class="empresa-location">
+                  <span class="location-icon">📍</span>
+                  {{ empresa.cidade }}{% if empresa.uf %}/{{ empresa.uf }}{% endif %}
+                </div>
+              </td>
+              <td>
+                <div class="actions">
+                  <a href="{% url 'relatorios:empresa_update' empresa.pk %}" class="btn-action btn-edit">
+                    <span>✏️</span>
+                    Editar
+                  </a>
+                  <a href="{% url 'relatorios:empresa_delete' empresa.pk %}" class="btn-action btn-delete">
+                    <span>🗑️</span>
+                    Excluir
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">🏢</div>
+        <h3>Nenhuma empresa cadastrada</h3>
+        <p>Comece cadastrando a primeira empresa para usar o sistema de tabloides.</p>
+        <a href="{% url 'relatorios:empresa_create' %}" class="btn btn-primary">
+          Cadastrar Primeira Empresa
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+// Funcionalidade de busca
+document.getElementById('search-empresas').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('.empresa-row');
+    
+    rows.forEach(row => {
+        const searchData = row.getAttribute('data-search');
+        if (searchData.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
 {% endblock %}
 
 

@@ -82,17 +82,92 @@ a:hover { opacity: 0.9; }
     color: var(--text);
 }
 
+/* Global input styling - glassmorphism style like login */
 .form-group input,
 .form-group select,
-.form-group textarea {
+.form-group textarea,
+input[type="text"],
+input[type="number"], 
+input[type="email"],
+input[type="password"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+textarea,
+select {
     width: 100%;
     max-width: 300px;
-    padding: 8px 12px;
-    border: 1px solid #20242d;
-    border-radius: 6px;
-    background: var(--card);
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
     color: var(--text);
-    font-size: 14px;
+    font-size: 1rem;
+    transition: var(--transition);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Focus states - glassmorphism style */
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="month"]:focus,
+input[type="time"]:focus,
+input[type="week"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Hover states - glassmorphism style */
+.form-group input:hover,
+.form-group select:hover,
+.form-group textarea:hover,
+input[type="text"]:hover,
+input[type="number"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="url"]:hover,
+input[type="search"]:hover,
+input[type="tel"]:hover,
+input[type="date"]:hover,
+input[type="datetime-local"]:hover,
+input[type="month"]:hover,
+input[type="time"]:hover,
+input[type="week"]:hover,
+textarea:hover,
+select:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+}
+
+/* Placeholder styling - glassmorphism style */
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    opacity: 1;
 }
 
 .form-group input[type="color"] {
@@ -134,19 +209,73 @@ button[type="submit"]:hover {
     background: #6d28d9;
 }
 
-/* Light theme adjustments */
+/* Light theme adjustments - inputs already have white background globally */
 .theme-light .form-group input,
 .theme-light .form-group select,
 .theme-light .form-group textarea {
     border: 1px solid #d1d5db;
 }
 
-.theme-light .form-group input:focus,
-.theme-light .form-group select:focus,
-.theme-light .form-group textarea:focus {
-    border-color: var(--brand);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+/* Override any other input styling throughout the project - glassmorphism style */
+.input-group input,
+.search-input,
+.file-input,
+.template-create-form input,
+.template-edit-form input,
+.empresa-form input,
+.import-form input {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.input-group input:focus,
+.search-input:focus,
+.file-input:focus,
+.template-create-form input:focus,
+.template-edit-form input:focus,
+.empresa-form input:focus,
+.import-form input:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+    color: var(--text) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+/* Ultra-specific rule for ALL input text fields - glassmorphism style */
+input,
+textarea,
+select,
+input[type],
+input[class],
+textarea[class],
+select[class],
+.form-control,
+.form-input,
+*[type="text"],
+*[type="email"],
+*[type="password"],
+*[type="search"],
+*[type="tel"],
+*[type="url"],
+*[type="number"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px);
+    color: var(--text) !important;
+}
+
+/* Specific styling for input-group inputs - glassmorphism style */
+.input-group input {
+    padding-left: calc(var(--space-md) * 2.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* Template grid styling */
