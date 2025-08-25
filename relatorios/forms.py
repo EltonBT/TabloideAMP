@@ -31,6 +31,26 @@ class ImportacaoTabelaForm(forms.ModelForm):
     class Meta:
         model = TabelaPrecoImportacao
         fields = ["arquivo"]
+        widgets = {
+            'arquivo': forms.FileInput(attrs={
+                'accept': '.xlsx,.csv',
+                'class': 'form-control'
+            })
+        }
+    
+    def clean_arquivo(self):
+        arquivo = self.cleaned_data.get('arquivo')
+        if arquivo:
+            nome_arquivo = arquivo.name.lower()
+            extensoes_permitidas = ['.xlsx', '.csv']
+            
+            if not any(nome_arquivo.endswith(ext) for ext in extensoes_permitidas):
+                raise forms.ValidationError(
+                    "Apenas arquivos .xlsx e .csv são permitidos. "
+                    f"Arquivo enviado: {arquivo.name}"
+                )
+        
+        return arquivo
 
 
 class TemplateTabloideForm(forms.ModelForm):

@@ -141,6 +141,41 @@
     margin-bottom: var(--space-2xl);
   }
 
+  .bulk-actions {
+    display: none;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--background-subtle);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .bulk-actions.show {
+    display: flex;
+  }
+
+  .selected-count {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .checkbox-cell {
+    width: 40px;
+    text-align: center;
+  }
+
+  .product-checkbox {
+    margin: 0;
+    transform: scale(1.1);
+  }
+
+  .select-all-checkbox {
+    margin: 0;
+    transform: scale(1.1);
+  }
+
   .stat-card {
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -215,45 +250,61 @@
     </div>
   </div>
 
+  <div class="bulk-actions" id="bulkActions">
+    <span class="selected-count" id="selectedCount">0 itens selecionados</span>
+    <button type="button" class="btn btn-danger" id="deleteSelected">
+      🗑️ Excluir Selecionados
+    </button>
+  </div>
+
   <div class="products-container">
     {% if object_list %}
-    <table class="products-table">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Nome do Produto</th>
-          <th>Preço</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for produto in object_list %}
-        <tr>
-          <td>
-            <span class="product-code">{{ produto.codigo }}</span>
-          </td>
-          <td class="product-name">{{ produto.nome }}</td>
-          <td class="product-price">R$ {{ produto.preco|floatformat:2 }}</td>
-          <td>
-            <div class="actions">
-              <a
-                href="{% url 'relatorios:produto_update' produto.pk %}"
-                class="btn-action btn-edit"
-              >
-                Editar
-              </a>
-              <a
-                href="{% url 'relatorios:produto_delete' produto.pk %}"
-                class="btn-action btn-delete"
-              >
-                Excluir
-              </a>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <form id="bulkDeleteForm" method="post" action="{% url 'relatorios:produto_bulk_delete' %}">
+      {% csrf_token %}
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th class="checkbox-cell">
+              <input type="checkbox" id="selectAll" class="select-all-checkbox">
+            </th>
+            <th>Código</th>
+            <th>Nome do Produto</th>
+            <th>Preço</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for produto in object_list %}
+          <tr>
+            <td class="checkbox-cell">
+              <input type="checkbox" name="selected_products" value="{{ produto.pk }}" class="product-checkbox">
+            </td>
+            <td>
+              <span class="product-code">{{ produto.codigo }}</span>
+            </td>
+            <td class="product-name">{{ produto.nome }}</td>
+            <td class="product-price">R$ {{ produto.preco|floatformat:2 }}</td>
+            <td>
+              <div class="actions">
+                <a
+                  href="{% url 'relatorios:produto_update' produto.pk %}"
+                  class="btn-action btn-edit"
+                >
+                  Editar
+                </a>
+                <a
+                  href="{% url 'relatorios:produto_delete' produto.pk %}"
+                  class="btn-action btn-delete"
+                >
+                  Excluir
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </form>
     {% else %}
     <div class="empty-state">
       <div class="empty-state-icon">📦</div>
@@ -266,4 +317,67 @@
     {% endif %}
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const productCheckboxes = document.querySelectorAll('.product-checkbox');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+    const deleteSelected = document.getElementById('deleteSelected');
+    const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+
+    function updateBulkActions() {
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+        const count = checkedBoxes.length;
+        
+        if (count > 0) {
+            bulkActions.classList.add('show');
+            selectedCount.textContent = `${count} ${count === 1 ? 'item selecionado' : 'itens selecionados'}`;
+        } else {
+            bulkActions.classList.remove('show');
+        }
+    }
+
+    // Controlar seleção de todos
+    selectAll.addEventListener('change', function() {
+        productCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkActions();
+    });
+
+    // Controlar seleção individual
+    productCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Atualizar estado do "selecionar todos"
+            const checkedCount = document.querySelectorAll('.product-checkbox:checked').length;
+            const totalCount = productCheckboxes.length;
+            
+            selectAll.checked = checkedCount === totalCount;
+            selectAll.indeterminate = checkedCount > 0 && checkedCount < totalCount;
+            
+            updateBulkActions();
+        });
+    });
+
+    // Botão de exclusão múltipla
+    deleteSelected.addEventListener('click', function() {
+        const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+        
+        if (checkedBoxes.length === 0) {
+            alert('Selecione pelo menos um produto para excluir.');
+            return;
+        }
+
+        const count = checkedBoxes.length;
+        const message = `Tem certeza que deseja excluir ${count} ${count === 1 ? 'produto' : 'produtos'}? Esta ação não pode ser desfeita.`;
+        
+        if (confirm(message)) {
+            bulkDeleteForm.submit();
+        }
+    });
+});
+</script>
+
 {% endblock %}

@@ -59,6 +59,11 @@ urlpatterns = [
         views.ProdutoDeleteView.as_view(),
         name="produto_delete",
     ),
+    path(
+        "produtos/excluir-multiplos/",
+        views.produto_bulk_delete,
+        name="produto_bulk_delete",
+    ),
     # Importação
     path("importacao/", views.importar_tabela_precos, name="importacao"),
     # Tabloide

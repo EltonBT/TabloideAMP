@@ -24,6 +24,7 @@ class TabelaPrecoImportacao(models.Model):
     arquivo = models.FileField(upload_to="importacoes/")
     criado_em = models.DateTimeField(auto_now_add=True)
     processado = models.BooleanField(default=False)
+    observacoes = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         return f"Importação #{self.id} - {self.arquivo.name}"
