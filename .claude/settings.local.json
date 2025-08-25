@@ -4,7 +4,8 @@
       "Bash(rm:*)",
       "Bash(python manage.py runserver:*)",
       "Bash(curl:*)",
-      "Bash(python manage.py shell:*)"
+      "Bash(python manage.py shell:*)",
+      "Bash(python manage.py:*)"
     ],
     "deny": [],
     "ask": []

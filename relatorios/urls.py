@@ -59,6 +59,11 @@ urlpatterns = [
         views.ProdutoDeleteView.as_view(),
         name="produto_delete",
     ),
+    path(
+        "produtos/excluir-multiplos/",
+        views.produto_bulk_delete,
+        name="produto_bulk_delete",
+    ),
     # Importação
     path("importacao/", views.importar_tabela_precos, name="importacao"),
     # Tabloide
@@ -76,6 +81,11 @@ urlpatterns = [
         "tabloide/templates/<int:pk>/editar/",
         views.TemplateTabloideUpdateView.as_view(),
         name="template_update",
+    ),
+    path(
+        "tabloide/templates/<int:pk>/excluir/",
+        views.TemplateTabloideDeleteView.as_view(),
+        name="template_delete",
     ),
     path(
         "tabloide/templates/<int:pk>/itens/",

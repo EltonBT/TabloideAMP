@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Template - TabloideAMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .delete-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--space-xl) 0;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ef4444;
+    margin-bottom: var(--space-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .page-icon {
+    font-size: 2.5rem;
+  }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .delete-container {
+    border: 2px solid #ef4444;
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    background: rgba(239, 68, 68, 0.05);
+    margin-bottom: var(--space-xl);
+  }
+
+  .warning-section {
+    background: rgba(245, 101, 101, 0.1);
+    border: 1px solid rgba(245, 101, 101, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .warning-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-weight: 600;
+    color: #ef4444;
+    margin-bottom: var(--space-md);
+    font-size: 1.1rem;
+  }
+
+  .warning-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .warning-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    color: var(--text-secondary);
+  }
+
+  .warning-icon {
+    color: #ef4444;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .template-info {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+  }
+
+  .info-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-sm) var(--space-lg);
+    align-items: center;
+  }
+
+  .info-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .info-value {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-delete {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
+  .btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+  }
+
+  .btn-cancel {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    min-width: 160px;
+  }
+
+  .btn-cancel:hover {
+    background: var(--background-subtle);
+    border-color: var(--text-secondary);
+  }
+
+  .back-button {
+    position: absolute;
+    top: var(--space-lg);
+    left: var(--space-lg);
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .back-button:hover {
+    background: var(--background-subtle);
+    border-color: var(--text-secondary);
+    transform: translateX(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .delete-container {
+      padding: var(--space-lg);
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .back-button {
+      position: static;
+      margin-bottom: var(--space-lg);
+      align-self: flex-start;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-xs);
+    }
+
+    .info-label {
+      font-weight: 600;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-page">
+  <a href="{% url 'relatorios:template_list' %}" class="back-button">
+    <span>←</span>
+    Voltar à Lista
+  </a>
+
+  <div class="page-header">
+    <h1 class="page-title">
+      <span class="page-icon">🗑️</span>
+      Excluir Template
+    </h1>
+    <p class="page-subtitle">
+      Esta ação não pode ser desfeita
+    </p>
+  </div>
+
+  <div class="delete-container">
+    <div class="warning-section">
+      <div class="warning-title">
+        <span>⚠️</span>
+        Atenção: Esta ação é irreversível
+      </div>
+      <ul class="warning-list">
+        <li>
+          <span class="warning-icon">•</span>
+          <span>O template será permanentemente excluído</span>
+        </li>
+        <li>
+          <span class="warning-icon">•</span>
+          <span>Todos os itens associados serão removidos</span>
+        </li>
+        <li>
+          <span class="warning-icon">•</span>
+          <span>Tabloides gerados anteriormente não serão afetados</span>
+        </li>
+        <li>
+          <span class="warning-icon">•</span>
+          <span>Esta operação não pode ser desfeita</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="template-info">
+      <div class="info-title">Informações do Template</div>
+      <div class="info-grid">
+        <span class="info-label">Nome:</span>
+        <span class="info-value">{{ object.nome }}</span>
+        
+        <span class="info-label">Dimensões:</span>
+        <span class="info-value">{{ object.colunas }} × {{ object.linhas }} ({{ total_positions }} posições)</span>
+        
+        <span class="info-label">Itens cadastrados:</span>
+        <span class="info-value">{{ object.itens.count }} item{{ object.itens.count|pluralize }}</span>
+        
+        <span class="info-label">Criado em:</span>
+        <span class="info-value">{{ object.created_at|date:"d/m/Y H:i" }}</span>
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <div class="form-actions">
+        <button type="submit" class="btn-delete">
+          <span>🗑️</span>
+          Sim, Excluir Template
+        </button>
+        <a href="{% url 'relatorios:template_list' %}" class="btn-cancel">
+          <span>←</span>
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

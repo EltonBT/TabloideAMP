@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Erro na Exclusão - TabloideAMP{% endblock %}
+
+{% block extra_css %}
+<style>
+  .error-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
+  .error-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .error-icon {
+    font-size: 3rem;
+    color: #ef4444;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    color: #991b1b;
+  }
+
+  .products-in-use {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .products-table th {
+    background: var(--background-subtle);
+    color: var(--text);
+    font-weight: 600;
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .products-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text);
+  }
+
+  .products-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .product-code {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: var(--background-subtle);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+  }
+
+  .templates-list {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .btn-secondary {
+    background: var(--background-subtle);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--background);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+  <div class="error-header">
+    <div class="error-icon">⚠️</div>
+    <div>
+      <h1 class="error-title">Não é possível excluir os produtos selecionados</h1>
+    </div>
+  </div>
+
+  <div class="error-message">
+    <strong>Alguns produtos estão sendo utilizados em templates de tabloide.</strong>
+    <br>
+    Para excluir estes produtos, primeiro remova-os dos templates onde estão sendo utilizados.
+  </div>
+
+  <div class="products-in-use">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome do Produto</th>
+          <th>Utilizado nos Templates</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in produtos_em_uso %}
+        <tr>
+          <td>
+            <span class="product-code">{{ item.produto.codigo }}</span>
+          </td>
+          <td>{{ item.produto.nome }}</td>
+          <td>
+            <span class="templates-list">{{ item.templates }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <a href="{% url 'relatorios:produto_list' %}" class="btn btn-secondary">
+      ← Voltar para Lista de Produtos
+    </a>
+    <a href="{% url 'relatorios:template_list' %}" class="btn btn-primary">
+      Gerenciar Templates
+    </a>
+  </div>
+</div>
+{% endblock %}

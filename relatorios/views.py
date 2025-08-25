@@ -130,7 +130,7 @@ def escolher_area(request: HttpRequest) -> HttpResponse:
             context['is_admin'] = True
             context['user'] = request.user
         else:
-            # Verificar tipo de usuário e redirecionar
+            # Verificar tipo de usuário e redirecionar automaticamente
             try:
                 empresa = request.user.empresa_profile
                 return redirect("relatorios:empresa_dashboard")
@@ -213,6 +213,59 @@ class ProdutoDeleteView(EmpresaRequiredMixin, DeleteView):
     success_url = reverse_lazy("relatorios:produto_list")
 
 
+@empresa_required
+def produto_bulk_delete(request: HttpRequest) -> HttpResponse:
+    """View para exclusão múltipla de produtos"""
+    if request.method == "POST":
+        selected_ids = request.POST.getlist('selected_products')
+        
+        if not selected_ids:
+            return redirect('relatorios:produto_list')
+        
+        # Converter IDs para inteiros e filtrar produtos
+        try:
+            selected_ids = [int(id) for id in selected_ids]
+            produtos = Produto.objects.filter(pk__in=selected_ids)
+            
+            if produtos.exists():
+                # Verificar se algum produto está sendo usado em templates
+                produtos_em_uso = []
+                for produto in produtos:
+                    if produto.itemtabloide_set.exists():
+                        templates_nomes = ", ".join([
+                            item.template.nome 
+                            for item in produto.itemtabloide_set.all()
+                        ])
+                        produtos_em_uso.append({
+                            'produto': produto,
+                            'templates': templates_nomes
+                        })
+                
+                if produtos_em_uso:
+                    context = {
+                        'produtos_em_uso': produtos_em_uso,
+                        'total_selecionados': len(selected_ids)
+                    }
+                    return render(request, 'relatorios/produtos/bulk_delete_error.html', context)
+                
+                # Se chegou até aqui, pode deletar
+                count = produtos.count()
+                produtos.delete()
+                
+                # Adicionar mensagem de sucesso
+                from django.contrib import messages
+                messages.success(
+                    request, 
+                    f'{count} {"produto foi excluído" if count == 1 else "produtos foram excluídos"} com sucesso!'
+                )
+            
+        except ValueError:
+            # IDs inválidos
+            pass
+    
+    return redirect('relatorios:produto_list')
+
+
 # Empresas CRUD
 class EmpresaListView(EmpresaRequiredMixin, ListView):
     model = Empresa
@@ -256,6 +309,7 @@ def importar_tabela_precos(request: HttpRequest) -> HttpResponse:
                     df = pd.read_csv(caminho, dtype=str)
                 else:
                     df = pd.read_excel(caminho, dtype=str)
+                
                 # Normaliza colunas
                 colmap = {c.lower().strip(): c for c in df.columns}
 
@@ -274,38 +328,87 @@ def importar_tabela_precos(request: HttpRequest) -> HttpResponse:
                     or get("codigo de barras")
                 )
                 col_desc = get("descricao") or get("descrição")
-                for _, row in df.iterrows():
-                    codigo = str(row.get(col_codigo, "")).strip() if col_codigo else ""
-                    if not codigo:
+                
+                # Verificar se colunas essenciais existem
+                if not col_codigo:
+                    form.add_error('arquivo', 'Coluna "codigo" ou "código" não encontrada no arquivo.')
+                    return render(request, "relatorios/importacao/form.html", {"form": form})
+                
+                if not col_nome:
+                    form.add_error('arquivo', 'Coluna "nome" não encontrada no arquivo.')
+                    return render(request, "relatorios/importacao/form.html", {"form": form})
+                
+                if not col_preco:
+                    form.add_error('arquivo', 'Coluna "preco" ou "preço" não encontrada no arquivo.')
+                    return render(request, "relatorios/importacao/form.html", {"form": form})
+                
+                produtos_processados = 0
+                erros_encontrados = []
+                
+                for index, row in df.iterrows():
+                    try:
+                        codigo = str(row.get(col_codigo, "")).strip() if col_codigo else ""
+                        if not codigo:
+                            continue
+                        
+                        nome = str(row.get(col_nome, "")).strip() if col_nome else ""
+                        if not nome:
+                            erros_encontrados.append(f"Linha {index + 2}: produto sem nome")
+                            continue
+                        
+                        # Processar preço
+                        preco = 0.0
+                        if col_preco:
+                            try:
+                                preco_str = str(row.get(col_preco, "0")).replace(",", ".").strip()
+                                preco = float(preco_str) if preco_str else 0.0
+                            except ValueError:
+                                erros_encontrados.append(f"Linha {index + 2}: preço inválido '{preco_str}'")
+                                continue
+                        
+                        # Criar ou atualizar produto
+                        produto, created = Produto.objects.get_or_create(
+                            codigo=codigo,
+                            defaults={
+                                'nome': nome,
+                                'preco': preco,
+                                'descricao': ""
+                            }
+                        )
+                        
+                        # Se produto já existe, atualizar apenas se novos valores não estão vazios
+                        if not created:
+                            if nome:
+                                produto.nome = nome
+                            if preco > 0:
+                                produto.preco = preco
+                        
+                        # Atualizar outros campos opcionais
+                        if col_desc:
+                            desc = str(row.get(col_desc, "")).strip()
+                            if desc:
+                                produto.descricao = desc
+                        
+                        if col_barras:
+                            cb = str(row.get(col_barras, "")).strip()
+                            if cb and cb.lower() not in ['nan', 'none', '']:
+                                produto.codigo_barras = cb
+                        
+                        produto.save()
+                        produtos_processados += 1
+                        
+                    except Exception as e:
+                        erros_encontrados.append(f"Linha {index + 2}: erro ao processar - {str(e)}")
                         continue
-                    produto, _ = Produto.objects.get_or_create(codigo=codigo)
-                    if col_nome:
-                        produto.nome = (
-                            str(row.get(col_nome, produto.nome or "")).strip()
-                            or produto.nome
-                        )
-                    if col_desc:
-                        produto.descricao = (
-                            str(row.get(col_desc, produto.descricao or "")).strip()
-                            or produto.descricao
-                        )
-                    if col_barras:
-                        cb = str(row.get(col_barras, "")).strip()
-                        if cb:
-                            produto.codigo_barras = cb
-                    if col_preco:
-                        try:
-                            preco_str = (
-                                str(row.get(col_preco, "")).replace(",", ".").strip()
-                            )
-                            produto.preco = float(preco_str or 0)
-                        except Exception:
-                            pass
-                    produto.save()
+                
                 importacao.processado = True
-            except Exception:
+                importacao.observacoes = f"Processados: {produtos_processados} produtos. Erros: {len(erros_encontrados)}"
+                
+            except Exception as e:
                 importacao.processado = False
-            importacao.save(update_fields=["processado"])
+                importacao.observacoes = f"Erro geral: {str(e)}"
+                form.add_error('arquivo', f'Erro ao processar arquivo: {str(e)}')
+            importacao.save(update_fields=["processado", "observacoes"])
             return redirect("relatorios:produto_list")
     else:
         form = ImportacaoTabelaForm()
@@ -341,24 +444,45 @@ class TemplateTabloideUpdateView(EmpresaRequiredMixin, UpdateView):
         return context
 
 
+class TemplateTabloideDeleteView(EmpresaRequiredMixin, DeleteView):
+    model = TemplateTabloide
+    template_name = "relatorios/tabloide/template_confirm_delete.html"
+    success_url = reverse_lazy("relatorios:template_list")
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_positions'] = self.object.colunas * self.object.linhas
+        return context
+
+
 @empresa_required
 def gerenciar_itens_tabloide(request: HttpRequest, pk: int) -> HttpResponse:
     template = get_object_or_404(TemplateTabloide, pk=pk)
+    
     if request.method == "POST":
-        if not request.user.has_perm("relatorios.change_templatetabloide"):
-            return redirect("login")
         form = ItemTabloideForm(request.POST, template=template)
         if form.is_valid():
-            form.save()
-            return redirect("relatorios:template_items", pk=template.pk)
+            try:
+                form.save()
+                return redirect("relatorios:template_items", pk=template.pk)
+            except Exception as e:
+                # Handle unique constraint error specifically
+                if "UNIQUE constraint failed" in str(e):
+                    form.add_error('ordem', 
+                        f'❌ A posição {form.cleaned_data.get("ordem")} já está ocupada. '
+                        'Escolha uma posição diferente.')
+                else:
+                    form.add_error(None, f"❌ Erro ao salvar o item: {str(e)}")
     else:
         form = ItemTabloideForm(template=template)
+    
     itens = template.itens.select_related("produto").all()
-    return render(
-        request,
-        "relatorios/tabloide/itens.html",
-        {"template": template, "form": form, "itens": itens},
-    )
+    context = {
+        "template": template, 
+        "form": form, 
+        "itens": itens
+    }
+    return render(request, "relatorios/tabloide/itens.html", context)
 
 
 @empresa_required
@@ -669,7 +793,7 @@ def gerar_pdf_exemplo(request: HttpRequest) -> HttpResponse:
 
     # Cabeçalho
     pdf.setFont("Helvetica-Bold", 16)
-    pdf.drawString(x0, y_top, "TabloideMP")
+    pdf.drawString(x0, y_top, "TabloideAMP")
     pdf.setFont("Helvetica", 10)
     pdf.drawString(
         x0, y_top - 16, "CNPJ: 00.000.000/0000-00 • contato@tabloidemp.local"

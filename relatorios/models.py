@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .validators import validate_cpf, validate_cnpj, validate_phone, validate_cep
 
 
 class Produto(models.Model):
@@ -23,6 +24,7 @@ class TabelaPrecoImportacao(models.Model):
     arquivo = models.FileField(upload_to="importacoes/")
     criado_em = models.DateTimeField(auto_now_add=True)
     processado = models.BooleanField(default=False)
+    observacoes = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         return f"Importação #{self.id} - {self.arquivo.name}"
@@ -96,11 +98,11 @@ class Empresa(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='empresa_profile', null=True, blank=True)
     razao_social = models.CharField(max_length=200)
     nome_fantasia = models.CharField(max_length=200, blank=True)
-    cnpj = models.CharField(max_length=18, unique=True)
+    cnpj = models.CharField(max_length=18, unique=True, validators=[validate_cnpj])
     ie = models.CharField(max_length=20, blank=True)
     email = models.EmailField(blank=True)
-    telefone = models.CharField(max_length=30, blank=True)
-    cep = models.CharField(max_length=10, blank=True)
+    telefone = models.CharField(max_length=30, blank=True, validators=[validate_phone])
+    cep = models.CharField(max_length=10, blank=True, validators=[validate_cep])
     endereco = models.CharField(max_length=255, blank=True)
     cidade = models.CharField(max_length=100, blank=True)
     uf = models.CharField(max_length=2, blank=True)
@@ -118,8 +120,8 @@ class Empresa(models.Model):
 class UsuarioCliente(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cliente_profile', null=True, blank=True)
     nome_completo = models.CharField(max_length=200)
-    telefone = models.CharField(max_length=30, blank=True)
-    cpf = models.CharField(max_length=14, unique=True, blank=True, null=True)
+    telefone = models.CharField(max_length=30, blank=True, validators=[validate_phone])
+    cpf = models.CharField(max_length=14, unique=True, blank=True, null=True, validators=[validate_cpf])
     empresa_associada = models.ForeignKey(Empresa, on_delete=models.SET_NULL, blank=True, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)

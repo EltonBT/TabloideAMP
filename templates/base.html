@@ -4,11 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}TabloideMP{% endblock %}</title>
+    <title>{% block title %}TabloideAMP{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/variables.css' %}" />
     <link rel="stylesheet" href="{% static 'css/modern.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}" />
     {% block extra_css %}{% endblock %}
   </head>
   <body>
@@ -18,7 +20,7 @@
           <div class="header-content">
             <a href="{% url 'relatorios:home' %}" class="brand">
               <div class="brand-icon">T</div>
-              <span>TabloideMP</span>
+              <span>TabloideAMP</span>
             </a>
             
             <nav class="nav-main">
@@ -29,6 +31,7 @@
                     <li><a href="{% url 'relatorios:produto_list' %}" class="nav-link">Produtos</a></li>
                     <li><a href="{% url 'relatorios:template_list' %}" class="nav-link">Templates</a></li>
                     <li><a href="{% url 'relatorios:importacao' %}" class="nav-link">Importação</a></li>
+                    <li><a href="{% url 'relatorios:empresa_list' %}" class="nav-link">Empresas</a></li>
                   {% endif %}
                 </ul>
                 
@@ -84,6 +87,15 @@
 
       <main class="app-main">
         <div class="container{% block container_class %}{% endblock %}">
+          {% if messages %}
+            <div class="messages">
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
           {% block content %}{% endblock %}
         </div>
       </main>
@@ -93,10 +105,10 @@
           <div class="footer-content">
             <div class="footer-brand">
               <div class="brand-icon">T</div>
-              <span>TabloideMP</span>
+              <span>TabloideAMP</span>
             </div>
             <div class="footer-text">
-              <small>&copy; {% now 'Y' %} TabloideMP. Todos os direitos reservados.</small>
+              <small>&copy; {% now 'Y' %} TabloideAMP. Todos os direitos reservados.</small>
             </div>
           </div>
         </div>
@@ -147,6 +159,9 @@
         }
       });
     </script>
+    
+    <!-- Input Masks -->
+    <script src="{% static 'js/masks.js' %}"></script>
     
     {% block extra_js %}{% endblock %}
   </body>

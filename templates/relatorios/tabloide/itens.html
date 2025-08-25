@@ -1,85 +1,912 @@
-{% extends 'base.html' %}
-{% block title %}Gerenciar Itens - {{ template.nome }} - TabloideMP{% endblock %}
-{% block content %}
-<section>
-  <div class="items-header">
-    <h2>Gerenciar Itens: {{ template.nome }}</h2>
-    <div class="header-info">
-      <span class="template-dimensions">Grid: {{ template.colunas }}×{{ template.linhas }}</span>
-      <span class="items-count">{{ itens|length }} itens adicionados</span>
+{% extends 'base.html' %} {% block title %}Gerenciar Itens - {{ template.nome }}
+- TabloideAMP{% endblock %} {% block extra_css %}
+<style>
+  .template-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--space-xl) 0;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: var(--space-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .page-icon {
+    font-size: 2.5rem;
+  }
+
+  .page-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .template-info-bar {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-lg);
+    margin-top: var(--space-md);
+    padding: var(--space-md);
+    background: rgba(var(--primary-rgb), 0.1);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--primary-rgb), 0.2);
+  }
+
+  .info-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .template-items-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: var(--space-2xl);
+    margin-bottom: var(--space-xl);
+  }
+
+  .items-form-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .preview-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: var(--space-xl);
+    height: fit-content;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .section-icon {
+    font-size: 1.5rem;
+  }
+
+  .form-section {
+    margin-bottom: var(--space-xl);
+  }
+
+  .form-section:last-of-type {
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-lg);
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-weight: 500;
+    color: var(--text);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    color: black;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.15),
+      0 4px 8px rgba(0, 0, 0, 0.1);
+    background: var(--background);
+    color: rgb(255, 255, 255);
+    transform: translateY(-1px);
+  }
+
+  .form-group input:hover,
+  .form-group select:hover,
+  .form-group textarea:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-group .helptext {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+    font-style: italic;
+  }
+
+  .form-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid #ef4444;
+  }
+
+  .btn-add {
+    background: linear-gradient(151deg, #0202042b, var(--primary-dark));
+    color: white;
+    border: none;
+    padding: var(--space-md) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+
+  .btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .items-list-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-sm);
+    margin-top: var(--space-xl);
+  }
+
+  .items-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .item-card {
+    background: var(--background-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+  }
+
+  .item-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+  }
+
+  .item-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .item-position {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .item-product {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  .item-price {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .btn-remove {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 500;
+  }
+
+  .btn-remove:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--text-secondary);
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+  }
+
+  .template-preview {
+    margin-bottom: var(--space-lg);
+  }
+
+  .preview-grid {
+    display: grid;
+    gap: 2px;
+    max-width: 100%;
+    border: 3px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: #ffffff;
+    box-shadow: var(--shadow-md);
+  }
+
+  .preview-cell {
+    background-color: #ffffff;
+    border: 1px dashed rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    font-size: 10px;
+    color: #666;
+    font-weight: 600;
+    transition: var(--transition);
+    position: relative;
+    cursor: pointer;
+  }
+
+  .preview-cell:hover:not(.occupied) {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.05);
+    transform: scale(1.05);
+  }
+
+  .preview-cell.occupied {
+    border: 2px solid #ef4444;
+    font-weight: 700;
+    color: #ef4444 !important;
+    cursor: not-allowed;
+    font-size: 24px !important;
+  }
+
+  .preview-cell.occupied:hover {
+    transform: scale(1.05);
+    border-color: #dc2626;
+    color: #dc2626 !important;
+  }
+
+  .preview-cell.selected {
+    border: 3px solid var(--primary);
+    background: rgba(var(--primary-rgb), 0.15);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(var(--primary-rgb), 0.3);
+  }
+
+  /* Styles for cell content are no longer needed since occupied cells show X */
+
+  .preview-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+  }
+
+  .info-item {
+    text-align: center;
+    padding: var(--space-md);
+    background: var(--background-subtle);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  .info-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+
+  .info-value {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .back-button {
+    position: absolute;
+    top: var(--space-lg);
+    left: var(--space-lg);
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .back-button:hover {
+    background: var(--background-subtle);
+    border-color: var(--text-secondary);
+    transform: translateX(-2px);
+  }
+
+  .actions-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-sm);
+    margin-top: var(--space-xl);
+  }
+
+  .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .btn-action {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    border: 2px solid var(--border);
+
+    color: var(--text);
+  }
+
+  .btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.05);
+  }
+
+  .btn-action.primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+
+  .btn-action.primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+
+  .btn-action.export {
+    background: #f59e0b;
+    color: white;
+    border-color: #f59e0b;
+  }
+
+  .btn-action.export:hover {
+    background: #d97706;
+    border-color: #d97706;
+  }
+
+  @media (max-width: 768px) {
+    .template-items-container {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+
+    .preview-section {
+      position: static;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .items-list {
+      grid-template-columns: 1fr;
+    }
+
+    .template-info-bar {
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .items-form-section,
+    .preview-section,
+    .items-list-section,
+    .actions-section {
+      padding: var(--space-lg);
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .back-button {
+      position: static;
+      margin-bottom: var(--space-lg);
+      align-self: flex-start;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="template-page">
+  <a
+    href="{% url 'relatorios:template_update' template.pk %}"
+    class="back-button"
+  >
+    <span>←</span>
+    Voltar para Template
+  </a>
+
+  <div class="page-header">
+    <h1 class="page-title">
+      <span class="page-icon">📝</span>
+      Gerenciar Itens
+    </h1>
+    <p class="page-subtitle">Template: {{ template.nome }}</p>
+
+    <div class="template-info-bar">
+      <div class="info-badge">
+        <span>📏</span>
+        Grid {{ template.colunas }}×{{ template.linhas }}
+      </div>
+      <div class="info-badge">
+        <span>📦</span>
+        {{ itens|length }} itens posicionados
+      </div>
+      <div class="info-badge">
+        <span>📍</span>
+        <span id="posicoes-livres"
+          >{{ template.colunas }} × {{ template.linhas }} posições</span
+        >
+      </div>
     </div>
   </div>
 
-  <div class="items-container">
-    <div class="add-item-section">
-      <h3>Adicionar Novo Item</h3>
-      <form method="post" class="item-form">
+  <div class="template-items-container">
+    <div class="items-form-section">
+      <h3 class="section-title">
+        <span class="section-icon">➕</span>
+        Adicionar Item
+      </h3>
+
+      <form method="post" class="item-form" id="item-form">
         {% csrf_token %}
         
-        <div class="form-row">
-          <div class="form-group">
-            <label for="{{ form.produto.id_for_label }}">Produto</label>
-            {{ form.produto }}
-            {% if form.produto.errors %}
-              <div class="error">{{ form.produto.errors }}</div>
-            {% endif %}
+        {% if form.non_field_errors %}
+          <div class="form-error" style="margin-bottom: var(--space-lg);">
+            {{ form.non_field_errors }}
           </div>
-          
-          <div class="form-group">
-            <label for="{{ form.ordem.id_for_label }}">Posição</label>
-            {{ form.ordem }}
-            {% if form.ordem.errors %}
-              <div class="error">{{ form.ordem.errors }}</div>
-            {% endif %}
-            <small>Posição no grid (1 a {{ template.colunas }} × {{ template.linhas }})</small>
+        {% endif %}
+
+        <div class="form-section">
+          <h4>📦 Novo Item</h4>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="{{ form.produto.id_for_label }}">Produto</label>
+              {{ form.produto }} {% if form.produto.errors %}
+              <div class="form-error">{{ form.produto.errors }}</div>
+              {% endif %}
+              <div class="helptext">Selecione o produto para adicionar</div>
+            </div>
+
+            <div class="form-group">
+              <label for="{{ form.ordem.id_for_label }}">Posição no Grid</label>
+              {{ form.ordem }} {% if form.ordem.errors %}
+              <div class="form-error">{{ form.ordem.errors }}</div>
+              {% endif %}
+              <div class="helptext">
+                Posição de 1 a
+                <span id="max-positions"
+                  >{{ template.colunas }} × {{ template.linhas }}</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-add">
+              <span>➕</span>
+              Adicionar ao Template
+            </button>
           </div>
         </div>
-        
-        <button type="submit" class="btn btn-primary">Adicionar Item</button>
       </form>
     </div>
 
-    <div class="items-grid-section">
-      <h3>Itens Posicionados</h3>
-      
-      {% if itens %}
-        <div class="items-list">
-          {% for item in itens %}
-            <div class="item-card">
-              <div class="item-info">
-                <span class="item-position">Posição {{ item.ordem }}</span>
-                <span class="item-product">{{ item.produto.nome }}</span>
-                <span class="item-price">R$ {{ item.produto.preco|floatformat:2 }}</span>
-              </div>
-              <form method="post" action="{% url 'relatorios:template_item_remove' template_pk=template.pk item_pk=item.pk %}" class="remove-form">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-remove" title="Remover item">Remover</button>
-              </form>
-            </div>
-          {% endfor %}
+    <div class="preview-section">
+      <h3 class="section-title">
+        <span class="section-icon">👁️</span>
+        Preview do Grid
+      </h3>
+
+      <div class="template-preview" id="template-preview">
+        <div class="preview-info-text" style="margin-bottom: var(--space-md); padding: var(--space-sm); background: rgba(var(--primary-rgb), 0.1); border-radius: var(--radius-sm); font-size: 0.875rem; text-align: center;">
+          <strong>💡 Como usar:</strong> Clique em uma posição livre (número) para selecioná-la. Posições com X já estão ocupadas.
         </div>
-      {% else %}
-        <div class="empty-grid">
-          <p>Nenhum item adicionado ainda.</p>
-          <p>Use o formulário acima para adicionar produtos às posições do grid {{ template.colunas }}×{{ template.linhas }}.</p>
+        <div class="preview-grid" id="preview-grid">
+          <!-- Preview will be generated by JavaScript -->
         </div>
-      {% endif %}
+      </div>
+
+      <div class="preview-info">
+        <div class="info-item">
+          <span class="info-label">Dimensões</span>
+          <span class="info-value"
+            >{{ template.colunas }} × {{ template.linhas }}</span
+          >
+        </div>
+        <div class="info-item">
+          <span class="info-label">Ocupação</span>
+          <span class="info-value" id="occupancy-info"
+            >{{ itens|length }} itens</span
+          >
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="template-actions">
-    <h3>Ações do Template</h3>
+  {% if itens %}
+  <div class="items-list-section">
+    <h3 class="section-title">
+      <span class="section-icon">📋</span>
+      Itens Configurados
+    </h3>
+
+    <div class="items-list">
+      {% for item in itens %}
+      <div class="item-card">
+        <div class="item-info">
+          <span class="item-position">Posição {{ item.ordem }}</span>
+          <span class="item-product">{{ item.produto.nome }}</span>
+          <span class="item-price"
+            >R$ {{ item.produto.preco|floatformat:2 }}</span
+          >
+        </div>
+        <form
+          method="post"
+          action="{% url 'relatorios:template_item_remove' template_pk=template.pk item_pk=item.pk %}"
+          class="remove-form"
+          style="margin: 0"
+        >
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="btn-remove"
+            title="Remover item"
+          >
+            🗑️ Remover
+          </button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="items-list-section">
+    <div class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h4>Nenhum item configurado</h4>
+      <p>
+        Use o formulário acima para adicionar produtos às posições do grid {{ template.colunas }}×{{ template.linhas }}.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="actions-section">
+    <h3 class="section-title">
+      <span class="section-icon">🔧</span>
+      Ações do Template
+    </h3>
     <div class="action-buttons">
-      <a href="{% url 'relatorios:template_update' template.pk %}" class="btn btn-secondary">
-        ← Voltar para Edição
+      <a
+        href="{% url 'relatorios:template_update' template.pk %}"
+        class="btn-action primary"
+      >
+        ✏️ Editar Template
       </a>
-      <a href="{% url 'relatorios:pdf_tabloide' %}?template={{ template.pk }}" class="btn btn-export" target="_blank">
+      <a
+        href="{% url 'relatorios:pdf_tabloide' %}?template={{ template.pk }}"
+        class="btn-action export"
+        target="_blank"
+      >
         📄 Gerar PDF
       </a>
-      <a href="{% url 'relatorios:jpeg_tabloide' %}?template={{ template.pk }}" class="btn btn-export" target="_blank">
+      <a
+        href="{% url 'relatorios:jpeg_tabloide' %}?template={{ template.pk }}"
+        class="btn-action export"
+        target="_blank"
+      >
         🖼️ Gerar JPEG
+      </a>
+      <a href="{% url 'relatorios:template_list' %}" class="btn-action">
+        📋 Lista de Templates
       </a>
     </div>
   </div>
-</section>
+</div>
+
+<script>
+  // Template data for preview
+  let templateData = {
+      colunas: {{ template.colunas }},
+      linhas: {{ template.linhas }},
+      corPrincipal: '{{ template.cor_fundo_row|default:"#FFFFFF" }}',
+      corAlternada: '{{ template.cor_fundo_alternada|default:"#FFFFFF" }}',
+      items: [{% for item in itens %}{
+          posicao: {{ item.ordem }},
+          nome: "{{ item.produto.nome|escapejs }}",
+          preco: {{ item.produto.preco }}
+      }{% if not forloop.last %},{% endif %}{% endfor %}]
+  };
+
+  // Debug
+  console.log('Template Data:', templateData);
+
+  function updatePreview() {
+      console.log('Updating preview...');
+      const grid = document.getElementById('preview-grid');
+      if (!grid) {
+          console.error('Grid element not found!');
+          return;
+      }
+
+      // Clear grid
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${templateData.colunas}, 1fr)`;
+
+      const totalPositions = templateData.linhas * templateData.colunas;
+      console.log(`Creating ${totalPositions} cells`);
+
+      for (let i = 0; i < totalPositions; i++) {
+          const position = i + 1;
+          const cell = document.createElement('div');
+          const row = Math.floor(i / templateData.colunas);
+          
+          // Find item for this position
+          const item = templateData.items.find(item => parseInt(item.posicao) === position);
+          console.log(`Position ${position}: ${item ? 'occupied by ' + item.nome : 'free'}`);
+          
+          // Always add base preview-cell class first
+          cell.className = 'preview-cell';
+          if (item) {
+              cell.classList.add('occupied');
+          }
+          
+          // Set attributes
+          cell.setAttribute('data-position', position);
+          cell.setAttribute('data-occupied', item ? 'true' : 'false');
+          
+          // Set minimum height and display
+          cell.style.minHeight = '50px';
+          cell.style.display = 'flex';
+          cell.style.alignItems = 'center';
+          cell.style.justifyContent = 'center';
+
+          if (item) {
+              // Occupied cell with X - keep alternating background
+              const bgColor = row % 2 === 0 ? templateData.corPrincipal : templateData.corAlternada;
+              cell.style.backgroundColor = bgColor;
+              cell.textContent = 'X';
+              cell.style.fontSize = '24px';
+              cell.style.fontWeight = 'bold';
+              cell.style.color = '#ef4444';
+              cell.title = `Posição ${position}: Ocupada por ${item.nome} - R$ ${parseFloat(item.preco).toFixed(2)} (clique para ver detalhes)`;
+          } else {
+              // Free cell with position number and alternating background
+              const bgColor = row % 2 === 0 ? templateData.corPrincipal : templateData.corAlternada;
+              cell.style.backgroundColor = bgColor;
+              cell.textContent = position;
+              cell.title = `Posição ${position} - Livre (clique para selecionar)`;
+          }
+
+          grid.appendChild(cell);
+      }
+      
+      console.log(`Preview updated with ${grid.children.length} cells`);
+      
+      // Update info after preview update
+      updateInfo();
+  }
+
+  // Initialize preview when DOM is ready
+  if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+          console.log('DOM loaded, initializing preview...');
+          updatePreview();
+      });
+  } else {
+      console.log('DOM already loaded, initializing preview...');
+      updatePreview();
+  }
+
+  // Update info elements
+  function updateInfo() {
+      const totalPositions = templateData.colunas * templateData.linhas;
+      const occupiedPositions = templateData.items.length;
+      const freePositions = totalPositions - occupiedPositions;
+
+      // Update info badges
+      const posicoesLivresEl = document.getElementById('posicoes-livres');
+      if (posicoesLivresEl) {
+          posicoesLivresEl.textContent = `${freePositions} posições livres`;
+      }
+
+      // Update max positions in helptext
+      const maxPositionsEl = document.getElementById('max-positions');
+      if (maxPositionsEl) {
+          maxPositionsEl.textContent = totalPositions;
+      }
+
+      // Update occupancy info
+      const occupancyInfoEl = document.getElementById('occupancy-info');
+      if (occupancyInfoEl) {
+          occupancyInfoEl.textContent = `${occupiedPositions}/${totalPositions}`;
+      }
+  }
+
+  // Add click handler for preview cells
+  document.addEventListener('click', function(e) {
+      const cell = e.target.closest('.preview-cell');
+      if (cell) {
+          // Remove previous selection
+          document.querySelectorAll('.preview-cell').forEach(c => c.classList.remove('selected'));
+          
+          const position = parseInt(cell.getAttribute('data-position'));
+          const isOccupied = cell.getAttribute('data-occupied') === 'true';
+          
+          if (isOccupied) {
+              // Show alert for occupied positions
+              const item = templateData.items.find(item => item.posicao === position);
+              if (item) {
+                  alert(`❌ Posição ${position} ocupada!\n\nProduto: ${item.nome}\nPreço: R$ ${parseFloat(item.preco).toFixed(2)}\n\nPara usar esta posição, remova o item existente primeiro na lista abaixo.`);
+              }
+              return;
+          }
+          
+          // Select the cell and fill input
+          cell.classList.add('selected');
+          const positionInput = document.querySelector('#{{ form.ordem.id_for_label }}');
+          if (positionInput) {
+              positionInput.value = position;
+              positionInput.focus();
+          }
+      }
+  });
+
+  // Add input validation
+  document.addEventListener('DOMContentLoaded', function() {
+      const positionInput = document.querySelector('#{{ form.ordem.id_for_label }}');
+      if (positionInput) {
+          positionInput.addEventListener('input', function() {
+              const position = parseInt(this.value);
+              const maxPositions = templateData.colunas * templateData.linhas;
+              
+              // Remove previous selections
+              document.querySelectorAll('.preview-cell').forEach(c => c.classList.remove('selected'));
+              
+              if (position >= 1 && position <= maxPositions) {
+                  // Check if position is occupied
+                  const isOccupied = templateData.items.some(item => item.posicao === position);
+                  if (isOccupied) {
+                      // Show warning for occupied position
+                      this.style.borderColor = '#ef4444';
+                      this.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                  } else {
+                      // Valid free position
+                      this.style.borderColor = '#10b981';
+                      this.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                      
+                      // Highlight the cell in preview
+                      const targetCell = document.querySelector(`[data-position="${position}"]`);
+                      if (targetCell && !targetCell.classList.contains('occupied')) {
+                          targetCell.classList.add('selected');
+                      }
+                  }
+              } else {
+                  // Invalid position
+                  this.style.borderColor = '#ef4444';
+                  this.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+              }
+          });
+          
+          positionInput.addEventListener('blur', function() {
+              // Reset styles on blur
+              this.style.borderColor = '';
+              this.style.backgroundColor = '';
+          });
+      }
+  });
+</script>
 {% endblock %}

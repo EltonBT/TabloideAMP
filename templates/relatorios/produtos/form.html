@@ -1,7 +1,5 @@
-{% extends 'base.html' %}
-{% block title %}{% if object %}Editar Produto{% else %}Novo Produto{% endif %} - TabloideMP{% endblock %}
-
-{% block extra_css %}
+{% extends 'base.html' %} {% block title %}{% if object %}Editar Produto{% else
+%}Novo Produto{% endif %} - TabloideAMP{% endblock %} {% block extra_css %}
 <style>
   .form-page {
     max-width: 800px;
@@ -28,7 +26,6 @@
   }
 
   .form-container {
-    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: var(--space-2xl);
@@ -78,8 +75,6 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     font-size: 1rem;
-    background: var(--background);
-    color: var(--text);
     transition: var(--transition);
   }
 
@@ -192,136 +187,131 @@
       grid-template-columns: 1fr;
       gap: var(--space-md);
     }
-    
+
     .form-actions {
       flex-direction: column;
     }
-    
+
     .form-container {
       padding: var(--space-lg);
     }
   }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="form-page">
   <div class="page-header">
     <h1 class="page-title">
-      {% if object %}
-        Editar Produto
-      {% else %}
-        Novo Produto
-      {% endif %}
+      {% if object %} Editar Produto {% else %} Novo Produto {% endif %}
     </h1>
     <p class="page-subtitle">
-      {% if object %}
-        Atualize as informações do produto
-      {% else %}
-        Adicione um novo produto ao seu catálogo
-      {% endif %}
+      {% if object %} Atualize as informações do produto {% else %} Adicione um
+      novo produto ao seu catálogo {% endif %}
     </p>
   </div>
 
   <div class="form-container">
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      
+
       <div class="form-section">
         <h3 class="section-title">Informações Básicas</h3>
-        
+
         <div class="form-row">
           <div class="form-group">
-            <label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>
-            {{ form.codigo }}
-            {% if form.codigo.help_text %}
-              <div class="helptext">{{ form.codigo.help_text }}</div>
-            {% endif %}
-            {% if form.codigo.errors %}
-              <div class="form-error">{{ form.codigo.errors }}</div>
+            <label for="{{ form.codigo.id_for_label }}"
+              >{{ form.codigo.label }}</label
+            >
+            {{ form.codigo }} {% if form.codigo.help_text %}
+            <div class="helptext">{{ form.codigo.help_text }}</div>
+            {% endif %} {% if form.codigo.errors %}
+            <div class="form-error">{{ form.codigo.errors }}</div>
             {% endif %}
           </div>
-          
+
           <div class="form-group">
-            <label for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
-            {{ form.nome }}
-            {% if form.nome.help_text %}
-              <div class="helptext">{{ form.nome.help_text }}</div>
-            {% endif %}
-            {% if form.nome.errors %}
-              <div class="form-error">{{ form.nome.errors }}</div>
+            <label for="{{ form.nome.id_for_label }}"
+              >{{ form.nome.label }}</label
+            >
+            {{ form.nome }} {% if form.nome.help_text %}
+            <div class="helptext">{{ form.nome.help_text }}</div>
+            {% endif %} {% if form.nome.errors %}
+            <div class="form-error">{{ form.nome.errors }}</div>
             {% endif %}
           </div>
         </div>
-        
+
         <div class="form-group">
-          <label for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
-          {{ form.descricao }}
-          {% if form.descricao.help_text %}
-            <div class="helptext">{{ form.descricao.help_text }}</div>
-          {% endif %}
-          {% if form.descricao.errors %}
-            <div class="form-error">{{ form.descricao.errors }}</div>
+          <label for="{{ form.descricao.id_for_label }}"
+            >{{ form.descricao.label }}</label
+          >
+          {{ form.descricao }} {% if form.descricao.help_text %}
+          <div class="helptext">{{ form.descricao.help_text }}</div>
+          {% endif %} {% if form.descricao.errors %}
+          <div class="form-error">{{ form.descricao.errors }}</div>
           {% endif %}
         </div>
       </div>
-      
+
       <div class="form-section">
         <h3 class="section-title">Preço e Categoria</h3>
-        
+
         <div class="form-row">
           <div class="form-group">
-            <label for="{{ form.preco.id_for_label }}">{{ form.preco.label }}</label>
-            {{ form.preco }}
-            {% if form.preco.help_text %}
-              <div class="helptext">{{ form.preco.help_text }}</div>
-            {% endif %}
-            {% if form.preco.errors %}
-              <div class="form-error">{{ form.preco.errors }}</div>
+            <label for="{{ form.preco.id_for_label }}"
+              >{{ form.preco.label }}</label
+            >
+            {{ form.preco }} {% if form.preco.help_text %}
+            <div class="helptext">{{ form.preco.help_text }}</div>
+            {% endif %} {% if form.preco.errors %}
+            <div class="form-error">{{ form.preco.errors }}</div>
             {% endif %}
           </div>
-          
+
           {% if form.categoria %}
-            <div class="form-group">
-              <label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
-              {{ form.categoria }}
-              {% if form.categoria.help_text %}
-                <div class="helptext">{{ form.categoria.help_text }}</div>
-              {% endif %}
-              {% if form.categoria.errors %}
-                <div class="form-error">{{ form.categoria.errors }}</div>
-              {% endif %}
-            </div>
+          <div class="form-group">
+            <label for="{{ form.categoria.id_for_label }}"
+              >{{ form.categoria.label }}</label
+            >
+            {{ form.categoria }} {% if form.categoria.help_text %}
+            <div class="helptext">{{ form.categoria.help_text }}</div>
+            {% endif %} {% if form.categoria.errors %}
+            <div class="form-error">{{ form.categoria.errors }}</div>
+            {% endif %}
+          </div>
           {% endif %}
         </div>
       </div>
-      
+
       {% if form.imagem %}
-        <div class="form-section">
-          <h3 class="section-title">Imagem do Produto</h3>
-          
-          <div class="form-group">
-            <label for="{{ form.imagem.id_for_label }}">{{ form.imagem.label }}</label>
-            <div class="file-input-wrapper">
-              {{ form.imagem }}
-              <label for="{{ form.imagem.id_for_label }}" class="file-input-label">
-                <div>
-                  <div class="file-icon">📁</div>
-                  <p>Clique para selecionar uma imagem</p>
-                  <small>Formatos aceitos: JPG, PNG, GIF</small>
-                </div>
-              </label>
-            </div>
-            {% if form.imagem.help_text %}
-              <div class="helptext">{{ form.imagem.help_text }}</div>
-            {% endif %}
-            {% if form.imagem.errors %}
-              <div class="form-error">{{ form.imagem.errors }}</div>
-            {% endif %}
+      <div class="form-section">
+        <h3 class="section-title">Imagem do Produto</h3>
+
+        <div class="form-group">
+          <label for="{{ form.imagem.id_for_label }}"
+            >{{ form.imagem.label }}</label
+          >
+          <div class="file-input-wrapper">
+            {{ form.imagem }}
+            <label
+              for="{{ form.imagem.id_for_label }}"
+              class="file-input-label"
+            >
+              <div>
+                <div class="file-icon">📁</div>
+                <p>Clique para selecionar uma imagem</p>
+                <small>Formatos aceitos: JPG, PNG, GIF</small>
+              </div>
+            </label>
           </div>
+          {% if form.imagem.help_text %}
+          <div class="helptext">{{ form.imagem.help_text }}</div>
+          {% endif %} {% if form.imagem.errors %}
+          <div class="form-error">{{ form.imagem.errors }}</div>
+          {% endif %}
         </div>
+      </div>
       {% endif %}
-      
+
       <div class="form-actions">
         <button type="submit" class="btn-save">
           {% if object %}Atualizar{% else %}Criar{% endif %} Produto
@@ -334,5 +324,3 @@
   </div>
 </div>
 {% endblock %}
-
-
